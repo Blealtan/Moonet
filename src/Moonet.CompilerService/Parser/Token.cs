@@ -12,7 +12,7 @@ namespace Moonet.CompilerService.Parser
         private object _val;
         public object Val => _val;
 
-        public Token(TokenType type, object val)
+        public Token(TokenType type, object val = null)
         {
             _type = type;
             _val = val;
@@ -76,7 +76,7 @@ namespace Moonet.CompilerService.Parser
         Colon, // :
         Comma, // ,
         Dot, // .
-        Vararg, // ...
+        VarArg, // ...
         String,
         Numeral
     }

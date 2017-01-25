@@ -31,11 +31,15 @@ namespace Moonet.CompilerService.Parser
         {
             var ret = CurrentLine == null ? -1 : CurrentLine[_colomn];
             if (++_colomn == CurrentLine.Length)
-            {
-                CurrentLine = _input.ReadLine();
-                _colomn = 0;
-            }
+                SkipLine();
             return ret;
+        }
+
+        private void SkipLine()
+        {
+            CurrentLine = _input.ReadLine() + '\n';
+            _colomn = 0;
+            ++_line;
         }
 
         public Queue<Tuple<int, int, string>> Errors { get; } = new Queue<Tuple<int, int, string>>();
@@ -91,7 +95,7 @@ namespace Moonet.CompilerService.Parser
             var initCol = _colomn;
 
             // Skip white spaces
-            while (x == ' ' || x == '\t')
+            while (x == ' ' || x == '\t' || x == '\n')
             {
                 Read();
                 x = Peek();
@@ -411,16 +415,14 @@ namespace Moonet.CompilerService.Parser
                     return ret;
                 }
                 // Body continues.
-                retBuilder.AppendLine(CurrentLine.Substring(_colomn));
-                _colomn = CurrentLine.Length;
-                Peek();
+                retBuilder.Append(CurrentLine.Substring(_colomn));
+                SkipLine();
             }
             // Handle those lines contain neither long bracket open nor close.
             while (CurrentLine != null && (endFound = CurrentLine.IndexOf(end)) == -1)
             {
-                retBuilder.AppendLine(CurrentLine);
-                _colomn = CurrentLine.Length;
-                Peek();
+                retBuilder.Append(CurrentLine);
+                SkipLine();
             }
 
             // Handle the case that long bracket body meets EOF.
@@ -432,6 +434,9 @@ namespace Moonet.CompilerService.Parser
             else // Handle last line.
             {
                 retBuilder.Append(CurrentLine.Substring(0, endFound));
+                _colomn = endFound + level + 2;
+                if (_colomn == CurrentLine.Length)
+                    SkipLine();
                 return retBuilder.ToString();
             }
         }

@@ -78,6 +78,7 @@ namespace Moonet.CompilerService.Parser
         Dot, // .
         VarArg, // ...
         String,
-        Numeral
+        Numeral,
+        EndOfFile
     }
 }

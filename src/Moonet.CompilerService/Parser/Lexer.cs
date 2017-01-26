@@ -373,7 +373,7 @@ namespace Moonet.CompilerService.Parser
             }
             string s = sb.ToString();
             if (_nameTokenMap.ContainsKey(s)) return _nameTokenMap[s];
-            return new Token(TokenType.Name, s);
+            return new Token<string>(TokenType.Name, s);
         }
 
         private Token MatchNumber()
@@ -381,7 +381,7 @@ namespace Moonet.CompilerService.Parser
             throw new NotImplementedException();
         }
 
-        private Token MatchRawString()
+        private Token<string> MatchRawString()
         {
             int level = 0;
             while (Peek() == '=')
@@ -393,7 +393,7 @@ namespace Moonet.CompilerService.Parser
                 AddError("Unrecognized lexical structure; assuming you forget a '[' at the long bracket start.");
             else Read();
             if (Peek() == '\n') Read(); // Skip newline at start.
-            return new Token(TokenType.String, LongBracketBody(level));
+            return new Token<string>(TokenType.String, LongBracketBody(level));
         }
 
         private string LongBracketBody(int level)
@@ -443,7 +443,7 @@ namespace Moonet.CompilerService.Parser
             }
         }
 
-        private Token MatchString()
+        private Token<string> MatchString()
         {
             throw new NotImplementedException();
         }

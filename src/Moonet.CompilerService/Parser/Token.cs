@@ -6,16 +6,21 @@ namespace Moonet.CompilerService.Parser
 {
     internal class Token
     {
-        private TokenType _type;
-        public TokenType Type => _type;
+        public TokenType Type { get; }
 
-        private object _val;
-        public object Val => _val;
-
-        public Token(TokenType type, object val = null)
+        public Token(TokenType type)
         {
-            _type = type;
-            _val = val;
+            Type = type;
+        }
+    }
+
+    internal class Token<TValue> : Token
+    {
+        public TValue Value { get; }
+
+        public Token(TokenType type, TValue value) : base(type)
+        {
+            Value = value;
         }
     }
 
@@ -78,7 +83,8 @@ namespace Moonet.CompilerService.Parser
         Dot, // .
         VarArg, // ...
         String,
-        Numeral,
+        Integer,
+        Float,
         EndOfFile
     }
 }

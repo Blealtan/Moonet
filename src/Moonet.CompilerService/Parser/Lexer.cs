@@ -8,7 +8,7 @@ namespace Moonet.CompilerService.Parser
 {
     internal class Lexer
     {
-        private TextReader _input;
+        private readonly TextReader _input;
 
         public Lexer(TextReader input)
         {
@@ -51,7 +51,7 @@ namespace Moonet.CompilerService.Parser
             Errors.Enqueue(Tuple.Create(_line, _colomn, info));
         }
 
-        private Dictionary<TokenType, Token> _basicTokenMap = new Dictionary<TokenType, Token>()
+        private readonly Dictionary<TokenType, Token> _basicTokenMap = new Dictionary<TokenType, Token>()
         {
             { TokenType.Add, new Token(TokenType.Add) },
             { TokenType.Minus, new Token(TokenType.Minus) },
@@ -89,7 +89,7 @@ namespace Moonet.CompilerService.Parser
             { TokenType.EndOfFile, new Token(TokenType.EndOfFile) }
         };
 
-        public (int line, int colomn, Token token) AnalyzeTokenStream()
+        public (int line, int colomn, Token token) AnalyzeNextToken()
         {
             var x = Peek();
             Token result = null;
@@ -335,7 +335,7 @@ namespace Moonet.CompilerService.Parser
             return (line: initLine, colomn: initCol, token: result);
         }
 
-        private Dictionary<string, Token> _nameTokenMap = new Dictionary<string, Token>()
+        private readonly Dictionary<string, Token> _nameTokenMap = new Dictionary<string, Token>()
         {
             { "and", new Token(TokenType.And) },
             { "break", new Token(TokenType.Break) },
@@ -363,15 +363,15 @@ namespace Moonet.CompilerService.Parser
 
         private Token MatchName()
         {
-            var sb = new StringBuilder();
-            sb.Append((char)Read());
-            int x = Peek();
-            while ((x >= 'a' && x <= 'z') || (x >= 'A' && x <= 'Z') || (x >= '0' && x <= '9') || x == '_')
+            int start = _colomn;
+            int x;
+            do
             {
-                sb.Append((char)Read());
+                NextChar();
                 x = Peek();
             }
-            string s = sb.ToString();
+            while ((x >= 'a' && x <= 'z') || (x >= 'A' && x <= 'Z') || (x >= '0' && x <= '9') || x == '_');
+            string s = CurrentLine.Substring(start, _colomn - start);
             if (_nameTokenMap.ContainsKey(s)) return _nameTokenMap[s];
             return new Token<string>(TokenType.Name, s);
         }
@@ -448,7 +448,7 @@ namespace Moonet.CompilerService.Parser
             throw new NotImplementedException();
         }
 
-        private static Regex _longBracketOpen = new Regex(@"^\[[=]*\[");
+        private static readonly Regex _longBracketOpen = new Regex(@"^\[[=]*\[", RegexOptions.Compiled);
 
         private void SkipComment()
         {

@@ -183,7 +183,7 @@ namespace Moonet.CompilerService.Parser
                     {
                         NextChar();
                         SkipComment();
-                        break;
+                        return AnalyzeNextToken();
                     }
                     else result = _basicTokenMap[TokenType.Minus];
                     break;
@@ -448,13 +448,20 @@ namespace Moonet.CompilerService.Parser
             throw new NotImplementedException();
         }
 
-        private static readonly Regex _longBracketOpen = new Regex(@"^\[[=]*\[", RegexOptions.Compiled);
-
         private void SkipComment()
         {
-            var match = _longBracketOpen.Match(CurrentLine.Substring(_colomn));
+            var match = -1;
+            var firstLine = CurrentLine.Substring(_colomn);
+            if (firstLine[0] == '[')
+            {
+                int i = 1;
+                while (i < firstLine.Length && firstLine[i] == '=')
+                    ++i;
+                if (i < firstLine.Length && firstLine[i] == '[')
+                    match = i;
+            }
             _colomn = CurrentLine.Length;
-            if (match != null) LongBracketBody(match.Length - 2);
+            if (match >= 0) LongBracketBody(match);
         }
     }
 }

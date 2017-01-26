@@ -21,21 +21,23 @@ namespace Moonet.CompilerService.Parser
         private int _colomn = 0;
 
         public string CurrentLine { get; private set; }
-        
-        private int Peek()
+
+        private int Peek() => CurrentLine?[_colomn] ?? -1;
+
+        private void NextChar()
         {
-            return CurrentLine == null ? -1 : CurrentLine[_colomn];
+            if (++_colomn == CurrentLine.Length)
+                NextLine();
         }
 
         private int Read()
         {
-            var ret = CurrentLine == null ? -1 : CurrentLine[_colomn];
-            if (++_colomn == CurrentLine.Length)
-                SkipLine();
+            var ret = Peek();
+            NextChar();
             return ret;
         }
 
-        private void SkipLine()
+        private void NextLine()
         {
             CurrentLine = _input.ReadLine() + '\n';
             _colomn = 0;
@@ -97,7 +99,7 @@ namespace Moonet.CompilerService.Parser
             // Skip white spaces
             while (x == ' ' || x == '\t' || x == '\n')
             {
-                Read();
+                NextChar();
                 x = Peek();
             }
 
@@ -172,70 +174,70 @@ namespace Moonet.CompilerService.Parser
                     result = MatchNumber();
                     break;
                 case '+':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.Add];
                     break;
                 case '-':
-                    Read();
+                    NextChar();
                     if (Peek() == '-')
                     {
-                        Read();
+                        NextChar();
                         SkipComment();
                         break;
                     }
                     else result = _basicTokenMap[TokenType.Minus];
                     break;
                 case '*':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.Multiply];
                     break;
                 case '/':
-                    Read();
+                    NextChar();
                     if (Peek() == '/')
                     {
-                        Read();
+                        NextChar();
                         result = _basicTokenMap[TokenType.FloorDivide];
                     }
                     else result = _basicTokenMap[TokenType.FloatDivide];
                     break;
                 case '%':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.Modulo];
                     break;
                 case '^':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.Exponent];
                     break;
                 case '#':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.Length];
                     break;
                 case '&':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.BitAnd];
                     break;
                 case '~':
-                    Read();
+                    NextChar();
                     if (Peek() == '=')
                     {
-                        Read();
+                        NextChar();
                         result = _basicTokenMap[TokenType.Inequal];
                     }
                     else result = _basicTokenMap[TokenType.BitXorOrNot];
                     break;
                 case '|':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.BitAnd];
                     break;
                 case '<':
                     if (Peek() == '<')
                     {
-                        Read();
+                        NextChar();
                         result = _basicTokenMap[TokenType.BitLShift];
                     }
                     else if (Peek() == '=')
                     {
-                        Read();
+                        NextChar();
                         result = _basicTokenMap[TokenType.LessEqual];
                     }
                     else result = _basicTokenMap[TokenType.Less];
@@ -243,66 +245,66 @@ namespace Moonet.CompilerService.Parser
                 case '>':
                     if (Peek() == '>')
                     {
-                        Read();
+                        NextChar();
                         result = _basicTokenMap[TokenType.BitRShift];
                     }
                     else if (Peek() == '=')
                     {
-                        Read();
+                        NextChar();
                         result = _basicTokenMap[TokenType.GreaterEqual];
                     }
                     else result = _basicTokenMap[TokenType.Greater];
                     break;
                 case '=':
-                    Read();
+                    NextChar();
                     if (Peek() == '=')
                     {
-                        Read();
+                        NextChar();
                         result = _basicTokenMap[TokenType.Equal];
                     }
                     else result = _basicTokenMap[TokenType.Assign];
                     break;
                 case '(':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.LeftParen];
                     break;
                 case ')':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.RightParen];
                     break;
                 case '{':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.LeftBrace];
                     break;
                 case '}':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.RightBrace];
                     break;
                 case ':':
-                    Read();
+                    NextChar();
                     if (Peek() == ':')
                     {
-                        Read();
+                        NextChar();
                         result = _basicTokenMap[TokenType.LabelMark];
                     }
                     else result = _basicTokenMap[TokenType.Colon];
                     break;
                 case ';':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.Semicolon];
                     break;
                 case ',':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.Comma];
                     break;
                 case '.':
-                    Read();
+                    NextChar();
                     if (Peek() == '.')
                     {
-                        Read();
+                        NextChar();
                         if (Peek() == '.')
                         {
-                            Read();
+                            NextChar();
                             result = _basicTokenMap[TokenType.VarArg];
                         }
                         else result = _basicTokenMap[TokenType.Concat];
@@ -310,12 +312,12 @@ namespace Moonet.CompilerService.Parser
                     else result = _basicTokenMap[TokenType.Dot];
                     break;
                 case '[':
-                    Read();
+                    NextChar();
                     if (Peek() == '=' || Peek() == '[') result = MatchRawString();
                     else result = _basicTokenMap[TokenType.LeftSquareBracket];
                     break;
                 case ']':
-                    Read();
+                    NextChar();
                     result = _basicTokenMap[TokenType.RightSquareBracket];
                     break;
                 case '"':
@@ -326,7 +328,7 @@ namespace Moonet.CompilerService.Parser
                     result = _basicTokenMap[TokenType.EndOfFile];
                     break;
                 default:
-                    Read();
+                    NextChar();
                     AddError("Unknown character found; ignoring.");
                     break;
             }
@@ -416,13 +418,13 @@ namespace Moonet.CompilerService.Parser
                 }
                 // Body continues.
                 retBuilder.Append(CurrentLine.Substring(_colomn));
-                SkipLine();
+                NextLine();
             }
             // Handle those lines contain neither long bracket open nor close.
             while (CurrentLine != null && (endFound = CurrentLine.IndexOf(end)) == -1)
             {
                 retBuilder.Append(CurrentLine);
-                SkipLine();
+                NextLine();
             }
 
             // Handle the case that long bracket body meets EOF.
@@ -436,7 +438,7 @@ namespace Moonet.CompilerService.Parser
                 retBuilder.Append(CurrentLine.Substring(0, endFound));
                 _colomn = endFound + level + 2;
                 if (_colomn == CurrentLine.Length)
-                    SkipLine();
+                    NextLine();
                 return retBuilder.ToString();
             }
         }

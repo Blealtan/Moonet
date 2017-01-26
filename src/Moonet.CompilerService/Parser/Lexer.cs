@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -378,7 +379,7 @@ namespace Moonet.CompilerService.Parser
 
         private Token MatchNumber()
         {
-            Func<int, int, int> pow = (x, y) =>
+            int pow(int x, int y)
             {
                 int r = 1;
                 while (y != 0)
@@ -388,7 +389,7 @@ namespace Moonet.CompilerService.Parser
                     x *= x;
                 }
                 return r;
-            };
+            }
 
             string src = CurrentLine.Substring(_colomn).ToLower();
             if (src.StartsWith("0x")) // Hexadecimal
@@ -563,7 +564,103 @@ namespace Moonet.CompilerService.Parser
 
         private Token<string> MatchString()
         {
-            throw new NotImplementedException();
+            var quote = (char)Read();
+            var sb = new StringBuilder();
+
+            var closePos = CurrentLine.IndexOf(quote, _colomn);
+            if (closePos == -1) closePos = CurrentLine.Length;
+            int slashPos;
+            while ((slashPos = CurrentLine.IndexOf(quote, _colomn)) < closePos)
+            {
+                if (slashPos == -1) break;
+                sb.Append(CurrentLine.Substring(_colomn, slashPos - _colomn));
+                switch (CurrentLine[slashPos + 1])
+                {
+                    // Some normal escape sequences.
+                    case 'a': _colomn = slashPos + 2; sb.Append('\a'); break;
+                    case 'b': _colomn = slashPos + 2; sb.Append('\b'); break;
+                    case 'f': _colomn = slashPos + 2; sb.Append('\f'); break;
+                    case 'n': _colomn = slashPos + 2; sb.Append('\n'); break;
+                    case 'r': _colomn = slashPos + 2; sb.Append('\r'); break;
+                    case 't': _colomn = slashPos + 2; sb.Append('\t'); break;
+                    case 'v': _colomn = slashPos + 2; sb.Append('\v'); break;
+                    case '\\': _colomn = slashPos + 2; sb.Append('\\'); break;
+                    // Quotes.
+                    case '\'':
+                    case '\"':
+                        _colomn = slashPos + 2;
+                        closePos = CurrentLine.IndexOf(quote, _colomn);
+                        sb.Append(CurrentLine[slashPos + 1]);
+                        break;
+                    // Decimal.
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        char n = (char)0;
+                        for (int i = 1; i < 4; i++)
+                        {
+                            if (CurrentLine[slashPos + i] >= '0' && CurrentLine[slashPos + i] <= '9')
+                                break;
+                            else
+                                n = (char)(n * 10 + CurrentLine[slashPos + i] - '0');
+                        }
+                        sb.Append(n);
+                        break;
+                    // Hexadecimal.
+                    case 'x':
+                        int x;
+                        if (!int.TryParse(CurrentLine.Substring(slashPos + 2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out x))
+                        {
+                            AddError(@"Expected two hexadecimal digits for '\x' escape sequence.");
+                            x = 'x';
+                            _colomn = slashPos + 2;
+                        }
+                        else _colomn = slashPos + 4;
+                        sb.Append((char)x);
+                        break;
+                    case 'u':
+                        int u;
+                        if (!int.TryParse(CurrentLine.Substring(slashPos + 2, 3), out u))
+                        {
+                            AddError(@"Expected two hexadecimal digits for '\u' escape sequence.");
+                            u = 'u';
+                            _colomn = slashPos + 2;
+                        }
+                        else _colomn = slashPos + 4;
+                        sb.Append((char)u);
+                        break;
+                    case '\n':
+                        NextLine();
+                        closePos = CurrentLine.IndexOf(quote, _colomn);
+                        if (closePos == -1) closePos = CurrentLine.Length;
+                        sb.Append('\n');
+                        break;
+                    default:
+                        AddError("Unrecognized escape sequence.");
+                        _colomn = slashPos + 2;
+                        sb.Append(CurrentLine[slashPos + 1]);
+                        break;
+                }
+            }
+            if (closePos == CurrentLine.Length)
+            {
+                AddError("Unexpected line ending in literal string.");
+                sb.Append(CurrentLine.Substring(_colomn));
+                NextLine();
+            }
+            else
+            {
+                sb.Append(CurrentLine.Substring(_colomn, closePos - _colomn));
+                _colomn = closePos + 1;
+            }
+            return new Token<string>(TokenType.String, sb.ToString());
         }
 
         private void SkipComment()

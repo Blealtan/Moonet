@@ -378,7 +378,125 @@ namespace Moonet.CompilerService.Parser
 
         private Token MatchNumber()
         {
-            throw new NotImplementedException();
+            Func<int, int, int> pow = (x, y) =>
+            {
+                int r = 1;
+                while (y != 0)
+                {
+                    if ((y & 1) != 0) r *= x;
+                    y >>= 1;
+                    x *= x;
+                }
+                return r;
+            };
+
+            string src = CurrentLine.Substring(_colomn).ToLower();
+            if (src.StartsWith("0x")) // Hexadecimal
+            {
+                // Integer part.
+                int pos = 2;
+                int integerPart = 0;
+                while ((src[pos] >= '0' && src[pos] <= '9') || (src[pos] >= 'a' && src[pos] <= 'f'))
+                {
+                    integerPart <<= 4;
+                    integerPart += src[pos] - (src[pos] <= '9' ? '0' : 'a');
+                    ++pos;
+                }
+                // If no float part or exponent, it's a integer.
+                if (src[pos] != '.' && src[pos] != 'p')
+                    return new Token<int>(TokenType.Integer, integerPart);
+
+                // Then for floats.
+                double floatResult = integerPart;
+                // Float part.
+                if (src[pos] == '.')
+                {
+                    ++pos;
+                    int floatLen = 0;
+                    int floatPart = 0;
+                    while ((src[pos] >= '0' && src[pos] <= '9') || (src[pos] >= 'a' && src[pos] <= 'f'))
+                    {
+                        floatPart <<= 4;
+                        floatPart += src[pos] - (src[pos] <= '9' ? '0' : 'a');
+                        ++pos;
+                        ++floatLen;
+                    }
+                    floatResult += floatPart / (double)pow(16, floatLen);
+                }
+                // Binary exponent.
+                if (src[pos] == 'p')
+                {
+                    ++pos;
+                    bool neg = false;
+                    if (src[pos] == '+') ++pos;
+                    else if (src[pos] == '-') { neg = true; ++pos; }
+
+                    // Actual exponent number.
+                    int exp = 0;
+                    while (src[pos] >= '0' && src[pos] <= '9')
+                    {
+                        exp *= 10;
+                        exp += src[pos] - '0';
+                        ++pos;
+                    }
+                    if (neg) floatResult /= pow(2, exp);
+                    else floatResult *= pow(2, exp);
+                }
+                return new Token<double>(TokenType.Float, floatResult);
+            }
+            else
+            {
+                // Integer part.
+                int pos = 0;
+                int integerPart = 0;
+                while (src[pos] >= '0' && src[pos] <= '9')
+                {
+                    integerPart *= 10;
+                    integerPart += src[pos] - '0';
+                    ++pos;
+                }
+                // If no float part or exponent, it's a integer.
+                if (src[pos] != '.' && src[pos] != 'e')
+                    return new Token<int>(TokenType.Integer, integerPart);
+
+                // Then for floats.
+                double floatResult = integerPart;
+                // Float part.
+                if (src[pos] == '.')
+                {
+                    ++pos;
+                    int floatLen = 0;
+                    int floatPart = 0;
+                    while (src[pos] >= '0' && src[pos] <= '9')
+                    {
+                        floatPart *= 10;
+                        floatPart += src[pos] - '0';
+                        ++pos;
+                        ++floatLen;
+                    }
+                    floatResult += floatPart / pow(10, floatLen);
+                }
+                // Exponent.
+                if (src[pos] == 'p')
+                {
+                    ++pos;
+                    bool neg = false;
+                    if (src[pos] == '+') ++pos;
+                    else if (src[pos] == '-') { neg = true; ++pos; }
+
+                    // Actual exponent number.
+                    int exp = 0;
+                    while (src[pos] >= '0' && src[pos] <= '9')
+                    {
+                        exp *= 10;
+                        exp += src[pos] - '0';
+                        ++pos;
+                    }
+                    if (neg) floatResult /= pow(2, exp);
+                    else floatResult *= pow(2, exp);
+                }
+                return new Token<double>(TokenType.Float, floatResult);
+            }
         }
 
         private Token<string> MatchRawString()

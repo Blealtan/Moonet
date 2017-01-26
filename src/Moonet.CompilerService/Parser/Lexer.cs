@@ -44,11 +44,11 @@ namespace Moonet.CompilerService.Parser
             ++_line;
         }
 
-        public Queue<Tuple<int, int, string>> Errors { get; } = new Queue<Tuple<int, int, string>>();
+        public Queue<Error> Errors { get; } = new Queue<Error>();
 
-        private void AddError(string info)
+        private void AddError(string message)
         {
-            Errors.Enqueue(Tuple.Create(_line, _colomn, info));
+            Errors.Enqueue(new Error(_line, _colomn, message));
         }
 
         private readonly Dictionary<TokenType, Token> _basicTokenMap = new Dictionary<TokenType, Token>()

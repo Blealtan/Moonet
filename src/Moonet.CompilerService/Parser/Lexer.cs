@@ -359,7 +359,14 @@ namespace Moonet.CompilerService.Parser
             { "then", new Token(TokenType.Then) },
             { "true", new Token(TokenType.True) },
             { "until", new Token(TokenType.Until) },
-            { "while", new Token(TokenType.While) }
+            { "while", new Token(TokenType.While) },
+            { "class", new Token(TokenType.Class) },
+            { "using", new Token(TokenType.Using) },
+            { "new", new Token(TokenType.New) },
+            { "boolean", new Token(TokenType.Boolean) },
+            { "integer", new Token(TokenType.Integer) },
+            { "float", new Token(TokenType.Float) },
+            { "string", new Token(TokenType.String) }
         };
 
         private Token MatchName()
@@ -418,7 +425,7 @@ namespace Moonet.CompilerService.Parser
             if (src[pos] != '.' && src[pos] != 'p')
             {
                 _colomn += pos;
-                return new Token<int>(TokenType.Integer, integerPart);
+                return new Token<int>(TokenType.IntegerLiteral, integerPart);
             }
 
             // Then for floats.
@@ -456,7 +463,7 @@ namespace Moonet.CompilerService.Parser
                 else floatResult *= pow(powerBase, exp);
             }
             _colomn += pos;
-            return new Token<double>(TokenType.Float, floatResult);
+            return new Token<double>(TokenType.FloatLiteral, floatResult);
         }
 
         private Token<string> MatchRawString()
@@ -471,7 +478,7 @@ namespace Moonet.CompilerService.Parser
                 AddError("Unrecognized lexical structure; assuming you forget a '[' at the long bracket start.");
             else Read();
             if (Peek() == '\n') Read(); // Skip newline at start.
-            return new Token<string>(TokenType.String, LongBracketBody(level));
+            return new Token<string>(TokenType.StringLiteral, LongBracketBody(level));
         }
 
         private string LongBracketBody(int level)
@@ -619,7 +626,7 @@ namespace Moonet.CompilerService.Parser
                 sb.Append(CurrentLine.Substring(_colomn, closePos - _colomn));
                 _colomn = closePos + 1;
             }
-            return new Token<string>(TokenType.String, sb.ToString());
+            return new Token<string>(TokenType.StringLiteral, sb.ToString());
         }
 
         private void SkipComment()

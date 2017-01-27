@@ -82,9 +82,18 @@ namespace Moonet.CompilerService.Parser
         Comma, // ,
         Dot, // .
         VarArg, // ...
-        String,
-        Integer,
-        Float,
-        EndOfFile
+        StringLiteral,
+        IntegerLiteral,
+        FloatLiteral,
+        EndOfFile,
+
+        // Moonet added:
+        Class, // class
+        Using, // using
+        New, // new
+        Boolean, // boolean
+        Integer, // integer
+        Float, // float
+        String // string
     }
 }

@@ -89,250 +89,263 @@ namespace Moonet.CompilerService.Parser
             { TokenType.EndOfFile, new Token(TokenType.EndOfFile) }
         };
 
+        /// <summary>
+        /// Analyze next token from provided reader.
+        /// </summary>
+        /// <returns>
+        /// line: Line number of start of this token, 1-based.
+        /// colomn: Colomn number of start of this token, 1-based.
+        /// token: Token analyzed. If unable to 
+        /// </returns>
         public (int line, int colomn, Token token) AnalyzeNextToken()
         {
-            var x = Peek();
+            int x, initLine, initCol;
             Token result = null;
-            var initLine = _line;
-            var initCol = _colomn;
-
-            // Skip white spaces
-            while (x == ' ' || x == '\t' || x == '\n')
+            while (true)
             {
-                NextChar();
                 x = Peek();
-            }
+                initLine = _line;
+                initCol = _colomn;
 
-            // Analyze this token
-            switch (x)
-            {
-                case 'a':
-                case 'b':
-                case 'c':
-                case 'd':
-                case 'e':
-                case 'f':
-                case 'g':
-                case 'h':
-                case 'i':
-                case 'j':
-                case 'k':
-                case 'l':
-                case 'm':
-                case 'n':
-                case 'o':
-                case 'p':
-                case 'q':
-                case 'r':
-                case 's':
-                case 't':
-                case 'u':
-                case 'v':
-                case 'w':
-                case 'x':
-                case 'y':
-                case 'z':
-                case 'A':
-                case 'B':
-                case 'C':
-                case 'D':
-                case 'E':
-                case 'F':
-                case 'G':
-                case 'H':
-                case 'I':
-                case 'J':
-                case 'K':
-                case 'L':
-                case 'M':
-                case 'N':
-                case 'O':
-                case 'P':
-                case 'Q':
-                case 'R':
-                case 'S':
-                case 'T':
-                case 'U':
-                case 'V':
-                case 'W':
-                case 'X':
-                case 'Y':
-                case 'Z':
-                case '_':
-                    result = MatchName();
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    result = MatchNumber();
-                    break;
-                case '+':
+                // Skip white spaces
+                while (x == ' ' || x == '\t' || x == '\n')
+                {
                     NextChar();
-                    result = _basicTokenMap[TokenType.Add];
-                    break;
-                case '-':
-                    NextChar();
-                    if (Peek() == '-')
-                    {
+                    x = Peek();
+                }
+
+                // Analyze this token
+                switch (x)
+                {
+                    case 'a':
+                    case 'b':
+                    case 'c':
+                    case 'd':
+                    case 'e':
+                    case 'f':
+                    case 'g':
+                    case 'h':
+                    case 'i':
+                    case 'j':
+                    case 'k':
+                    case 'l':
+                    case 'm':
+                    case 'n':
+                    case 'o':
+                    case 'p':
+                    case 'q':
+                    case 'r':
+                    case 's':
+                    case 't':
+                    case 'u':
+                    case 'v':
+                    case 'w':
+                    case 'x':
+                    case 'y':
+                    case 'z':
+                    case 'A':
+                    case 'B':
+                    case 'C':
+                    case 'D':
+                    case 'E':
+                    case 'F':
+                    case 'G':
+                    case 'H':
+                    case 'I':
+                    case 'J':
+                    case 'K':
+                    case 'L':
+                    case 'M':
+                    case 'N':
+                    case 'O':
+                    case 'P':
+                    case 'Q':
+                    case 'R':
+                    case 'S':
+                    case 'T':
+                    case 'U':
+                    case 'V':
+                    case 'W':
+                    case 'X':
+                    case 'Y':
+                    case 'Z':
+                    case '_':
+                        result = MatchName();
+                        break;
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        result = MatchNumber();
+                        break;
+                    case '+':
                         NextChar();
-                        SkipComment();
-                        return AnalyzeNextToken();
-                    }
-                    else result = _basicTokenMap[TokenType.Minus];
-                    break;
-                case '*':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.Multiply];
-                    break;
-                case '/':
-                    NextChar();
-                    if (Peek() == '/')
-                    {
+                        result = _basicTokenMap[TokenType.Add];
+                        break;
+                    case '-':
                         NextChar();
-                        result = _basicTokenMap[TokenType.FloorDivide];
-                    }
-                    else result = _basicTokenMap[TokenType.FloatDivide];
-                    break;
-                case '%':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.Modulo];
-                    break;
-                case '^':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.Exponent];
-                    break;
-                case '#':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.Length];
-                    break;
-                case '&':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.BitAnd];
-                    break;
-                case '~':
-                    NextChar();
-                    if (Peek() == '=')
-                    {
+                        if (Peek() == '-')
+                        {
+                            NextChar();
+                            SkipComment();
+                            return AnalyzeNextToken();
+                        }
+                        else result = _basicTokenMap[TokenType.Minus];
+                        break;
+                    case '*':
                         NextChar();
-                        result = _basicTokenMap[TokenType.Inequal];
-                    }
-                    else result = _basicTokenMap[TokenType.BitXorOrNot];
-                    break;
-                case '|':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.BitAnd];
-                    break;
-                case '<':
-                    if (Peek() == '<')
-                    {
+                        result = _basicTokenMap[TokenType.Multiply];
+                        break;
+                    case '/':
                         NextChar();
-                        result = _basicTokenMap[TokenType.BitLShift];
-                    }
-                    else if (Peek() == '=')
-                    {
+                        if (Peek() == '/')
+                        {
+                            NextChar();
+                            result = _basicTokenMap[TokenType.FloorDivide];
+                        }
+                        else result = _basicTokenMap[TokenType.FloatDivide];
+                        break;
+                    case '%':
                         NextChar();
-                        result = _basicTokenMap[TokenType.LessEqual];
-                    }
-                    else result = _basicTokenMap[TokenType.Less];
-                    break;
-                case '>':
-                    if (Peek() == '>')
-                    {
+                        result = _basicTokenMap[TokenType.Modulo];
+                        break;
+                    case '^':
                         NextChar();
-                        result = _basicTokenMap[TokenType.BitRShift];
-                    }
-                    else if (Peek() == '=')
-                    {
+                        result = _basicTokenMap[TokenType.Exponent];
+                        break;
+                    case '#':
                         NextChar();
-                        result = _basicTokenMap[TokenType.GreaterEqual];
-                    }
-                    else result = _basicTokenMap[TokenType.Greater];
-                    break;
-                case '=':
-                    NextChar();
-                    if (Peek() == '=')
-                    {
+                        result = _basicTokenMap[TokenType.Length];
+                        break;
+                    case '&':
                         NextChar();
-                        result = _basicTokenMap[TokenType.Equal];
-                    }
-                    else result = _basicTokenMap[TokenType.Assign];
-                    break;
-                case '(':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.LeftParen];
-                    break;
-                case ')':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.RightParen];
-                    break;
-                case '{':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.LeftBrace];
-                    break;
-                case '}':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.RightBrace];
-                    break;
-                case ':':
-                    NextChar();
-                    if (Peek() == ':')
-                    {
+                        result = _basicTokenMap[TokenType.BitAnd];
+                        break;
+                    case '~':
                         NextChar();
-                        result = _basicTokenMap[TokenType.LabelMark];
-                    }
-                    else result = _basicTokenMap[TokenType.Colon];
-                    break;
-                case ';':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.Semicolon];
-                    break;
-                case ',':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.Comma];
-                    break;
-                case '.':
-                    NextChar();
-                    if (Peek() == '.')
-                    {
+                        if (Peek() == '=')
+                        {
+                            NextChar();
+                            result = _basicTokenMap[TokenType.Inequal];
+                        }
+                        else result = _basicTokenMap[TokenType.BitXorOrNot];
+                        break;
+                    case '|':
+                        NextChar();
+                        result = _basicTokenMap[TokenType.BitAnd];
+                        break;
+                    case '<':
+                        if (Peek() == '<')
+                        {
+                            NextChar();
+                            result = _basicTokenMap[TokenType.BitLShift];
+                        }
+                        else if (Peek() == '=')
+                        {
+                            NextChar();
+                            result = _basicTokenMap[TokenType.LessEqual];
+                        }
+                        else result = _basicTokenMap[TokenType.Less];
+                        break;
+                    case '>':
+                        if (Peek() == '>')
+                        {
+                            NextChar();
+                            result = _basicTokenMap[TokenType.BitRShift];
+                        }
+                        else if (Peek() == '=')
+                        {
+                            NextChar();
+                            result = _basicTokenMap[TokenType.GreaterEqual];
+                        }
+                        else result = _basicTokenMap[TokenType.Greater];
+                        break;
+                    case '=':
+                        NextChar();
+                        if (Peek() == '=')
+                        {
+                            NextChar();
+                            result = _basicTokenMap[TokenType.Equal];
+                        }
+                        else result = _basicTokenMap[TokenType.Assign];
+                        break;
+                    case '(':
+                        NextChar();
+                        result = _basicTokenMap[TokenType.LeftParen];
+                        break;
+                    case ')':
+                        NextChar();
+                        result = _basicTokenMap[TokenType.RightParen];
+                        break;
+                    case '{':
+                        NextChar();
+                        result = _basicTokenMap[TokenType.LeftBrace];
+                        break;
+                    case '}':
+                        NextChar();
+                        result = _basicTokenMap[TokenType.RightBrace];
+                        break;
+                    case ':':
+                        NextChar();
+                        if (Peek() == ':')
+                        {
+                            NextChar();
+                            result = _basicTokenMap[TokenType.LabelMark];
+                        }
+                        else result = _basicTokenMap[TokenType.Colon];
+                        break;
+                    case ';':
+                        NextChar();
+                        result = _basicTokenMap[TokenType.Semicolon];
+                        break;
+                    case ',':
+                        NextChar();
+                        result = _basicTokenMap[TokenType.Comma];
+                        break;
+                    case '.':
                         NextChar();
                         if (Peek() == '.')
                         {
                             NextChar();
-                            result = _basicTokenMap[TokenType.VarArg];
+                            if (Peek() == '.')
+                            {
+                                NextChar();
+                                result = _basicTokenMap[TokenType.VarArg];
+                            }
+                            else result = _basicTokenMap[TokenType.Concat];
                         }
-                        else result = _basicTokenMap[TokenType.Concat];
-                    }
-                    else result = _basicTokenMap[TokenType.Dot];
-                    break;
-                case '[':
-                    NextChar();
-                    if (Peek() == '=' || Peek() == '[') result = MatchRawString();
-                    else result = _basicTokenMap[TokenType.LeftSquareBracket];
-                    break;
-                case ']':
-                    NextChar();
-                    result = _basicTokenMap[TokenType.RightSquareBracket];
-                    break;
-                case '"':
-                case '\'':
-                    result = MatchString();
-                    break;
-                case -1:
-                    result = _basicTokenMap[TokenType.EndOfFile];
-                    break;
-                default:
-                    NextChar();
-                    AddError("Unknown character found; ignoring.");
-                    break;
+                        else result = _basicTokenMap[TokenType.Dot];
+                        break;
+                    case '[':
+                        NextChar();
+                        if (Peek() == '=' || Peek() == '[') result = MatchRawString();
+                        else result = _basicTokenMap[TokenType.LeftSquareBracket];
+                        break;
+                    case ']':
+                        NextChar();
+                        result = _basicTokenMap[TokenType.RightSquareBracket];
+                        break;
+                    case '"':
+                    case '\'':
+                        result = MatchString();
+                        break;
+                    case -1:
+                        result = _basicTokenMap[TokenType.EndOfFile];
+                        break;
+                    default:
+                        NextChar();
+                        AddError("Unknown character found; ignoring.");
+                        continue;
+                }
+                break;
             }
-            return (line: initLine, colomn: initCol, token: result);
+            return (line: initLine, colomn: initCol + 1, token: result);
         }
 
         private readonly Dictionary<string, Token> _nameTokenMap = new Dictionary<string, Token>()
@@ -515,7 +528,7 @@ namespace Moonet.CompilerService.Parser
             if (CurrentLine == null)
             {
                 AddError("Long bracket body meets EOF.");
-                return null;
+                return retBuilder.ToString();
             }
             else // Handle last line.
             {

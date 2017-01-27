@@ -8,11 +8,13 @@ namespace Moonet.CompilerService
     {
         public int Line { get; }
         public int Colomn { get; }
+        public string CurrentLine { get; }
         public string Message { get; }
-        public Error(int line, int colomn, string message = "")
+        public Error(int line, int colomn, string currentLine, string message = "")
         {
             Line = line;
             Colomn = colomn;
+            CurrentLine = currentLine;
             Message = message;
         }
     }

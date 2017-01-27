@@ -49,7 +49,7 @@ namespace Moonet.CompilerService.Parser
 
         private void AddError(string message)
         {
-            Errors.Enqueue(new Error(_line, _colomn, message));
+            Errors.Enqueue(new Error(_line, _colomn, CurrentLine, message));
         }
 
         private readonly Dictionary<TokenType, Token> _basicTokenMap = new Dictionary<TokenType, Token>()

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Moonet.CompilerService.Parser
 {
@@ -11,10 +9,18 @@ namespace Moonet.CompilerService.Parser
     {
         private readonly TextReader _input;
 
-        public Lexer(TextReader input)
+        private readonly Queue<Error> _errors;
+
+        public Lexer(TextReader input, Queue<Error> errors)
         {
             _input = input;
+            _errors = errors;
             CurrentLine = _input.ReadLine();
+        }
+
+        private void AddError(string message)
+        {
+            _errors.Enqueue(new Error(_line, _colomn, CurrentLine, message));
         }
 
         private int _line = 1;
@@ -43,13 +49,6 @@ namespace Moonet.CompilerService.Parser
             CurrentLine = _input.ReadLine() + '\n';
             _colomn = 0;
             ++_line;
-        }
-
-        public Queue<Error> Errors { get; } = new Queue<Error>();
-
-        private void AddError(string message)
-        {
-            Errors.Enqueue(new Error(_line, _colomn, CurrentLine, message));
         }
 
         private readonly Dictionary<TokenType, Token> _basicTokenMap = new Dictionary<TokenType, Token>()

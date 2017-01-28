@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Moonet.CompilerService.Parser
+namespace Moonet.CompilerService.Syntax
 {
     public class SyntaxNode
     {
@@ -12,6 +12,36 @@ namespace Moonet.CompilerService.Parser
         {
             Line = line;
             Colomn = colomn;
+        }
+    }
+
+    public class UsingSyntax : SyntaxNode
+    {
+        public UsingSyntax(int line, int colomn) : base(line, colomn)
+        {
+        }
+    }
+
+    public class UsingNamespaceSyntax : UsingSyntax
+    {
+        public string Namespace { get; }
+
+        public UsingNamespaceSyntax(int line, int colomn, string namespace_) : base(line, colomn)
+        {
+            Namespace = namespace_;
+        }
+    }
+
+    public class UsingFileSyntax : UsingSyntax
+    {
+        public string UsingFileName { get; }
+
+        public string AsVar { get; }
+
+        public UsingFileSyntax(int line, int colomn, string usingFileName, string asVar) : base(line, colomn)
+        {
+            UsingFileName = usingFileName;
+            AsVar = asVar;
         }
     }
 
@@ -42,21 +72,6 @@ namespace Moonet.CompilerService.Parser
         public BlockSyntax(int line, int colomn) : base(line, colomn)
         {
             Statements = new List<StatementSyntax>();
-        }
-    }
-
-    public class FileSyntaxTree
-    {
-        public string FileName { get; }
-
-        public BlockSyntax Body { get; }
-
-        //!TODO: Class definitions
-
-        public FileSyntaxTree(string filename)
-        {
-            FileName = filename;
-            Body = new BlockSyntax(1, 1);
         }
     }
 }

@@ -12,11 +12,10 @@ namespace Moonet.CompilerService.Syntax
 
     public class LiteralExpressionSyntax<T> : ExpressionSyntax
     {
-        public T LiteralValue { get; }
+        public T LiteralValue { get; set; }
 
-        public LiteralExpressionSyntax(int line, int colomn, T val) : base(line, colomn)
+        public LiteralExpressionSyntax(int line, int colomn) : base(line, colomn)
         {
-            LiteralValue = val;
         }
     }
 
@@ -24,9 +23,8 @@ namespace Moonet.CompilerService.Syntax
     {
         public string Name { get; }
 
-        public VariableExpression(int line, int colomn, string name) : base(line, colomn)
+        public VariableExpression(int line, int colomn) : base(line, colomn)
         {
-            Name = name;
         }
     }
 
@@ -34,11 +32,10 @@ namespace Moonet.CompilerService.Syntax
     {
         public ICollection<Tuple<string, string>> Parameters { get; } = new List<Tuple<string, string>>();
 
-        public BlockSyntax Body { get; }
+        public BlockSyntax Body { get; set; }
 
         public FunctionDefinitionExpressionSyntax(int line, int colomn) : base(line, colomn)
         {
-            Body = new BlockSyntax(line, colomn);
         }
     }
 
@@ -60,39 +57,36 @@ namespace Moonet.CompilerService.Syntax
 
     public class BinaryOperatorExpressionSyntax : ExpressionSyntax
     {
-        public BinaryOperator Operator { get; }
+        public BinaryOperator Operator { get; set; }
 
         public ExpressionSyntax LHS { get; set; }
 
         public ExpressionSyntax RHS { get; set; }
 
-        public BinaryOperatorExpressionSyntax(int line, int colomn, BinaryOperator op) : base(line, colomn)
+        public BinaryOperatorExpressionSyntax(int line, int colomn) : base(line, colomn)
         {
-            Operator = op;
         }
     }
 
     public class UnaryOperatorExpressionSyntax : ExpressionSyntax
     {
-        public UnaryOperator Operator { get; }
+        public UnaryOperator Operator { get; set; }
 
         public ExpressionSyntax RHS { get; set; }
 
-        public UnaryOperatorExpressionSyntax(int line, int colomn, UnaryOperator op) : base(line, colomn)
+        public UnaryOperatorExpressionSyntax(int line, int colomn) : base(line, colomn)
         {
-            Operator = op;
         }
     }
 
     public class FunctionCallExpressionSyntax : ExpressionSyntax
     {
-        public ExpressionSyntax Function { get; }
+        public ExpressionSyntax Function { get; set; }
 
         public ICollection<ExpressionSyntax> Arguments { get; } = new List<ExpressionSyntax>();
 
-        public FunctionCallExpressionSyntax(int line, int colomn, ExpressionSyntax func) : base(line, colomn)
+        public FunctionCallExpressionSyntax(int line, int colomn) : base(line, colomn)
         {
-            Function = func;
         }
     }
 }

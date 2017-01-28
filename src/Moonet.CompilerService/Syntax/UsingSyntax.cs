@@ -1,6 +1,6 @@
 ﻿namespace Moonet.CompilerService.Syntax
 {
-    public class UsingSyntax : SyntaxNode
+    public abstract class UsingSyntax : SyntaxNode
     {
         public UsingSyntax(int line, int colomn) : base(line, colomn)
         {

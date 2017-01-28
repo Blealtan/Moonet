@@ -10,9 +10,9 @@ namespace Moonet.CompilerService.Syntax
 
         public ICollection<LocalDefinitionStatementSyntax> Fields { get; } = new List<LocalDefinitionStatementSyntax>();
 
-        public IDictionary<string, FunctionDefinitionStatementSyntax> Members { get; } = new Dictionary<string, FunctionDefinitionStatementSyntax>();
+        public IDictionary<string, FunctionDefinitionExpressionSyntax> Members { get; } = new Dictionary<string, FunctionDefinitionExpressionSyntax>();
 
-        public IDictionary<string, FunctionDefinitionStatementSyntax> StaticMembers { get; } = new Dictionary<string, FunctionDefinitionStatementSyntax>();
+        public IDictionary<string, FunctionDefinitionExpressionSyntax> StaticMembers { get; } = new Dictionary<string, FunctionDefinitionExpressionSyntax>();
 
         public ClassDefinitionSyntax(int line, int colomn, string name) : base(line, colomn)
         {

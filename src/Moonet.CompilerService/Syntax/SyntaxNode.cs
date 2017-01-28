@@ -2,7 +2,7 @@
 
 namespace Moonet.CompilerService.Syntax
 {
-    public class SyntaxNode
+    public abstract class SyntaxNode
     {
         public int Line { get; }
 

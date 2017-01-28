@@ -6,17 +6,15 @@ namespace Moonet.CompilerService.Syntax
     {
         public string FileName { get; }
 
-        public BlockSyntax Body { get; }
+        public BlockSyntax Body { get; } = new BlockSyntax(1, 1);
 
-        public ICollection<UsingSyntax> Usings { get; }
+        public ICollection<UsingSyntax> Usings { get; } = new List<UsingSyntax>();
 
         //!TODO: Class definitions
 
         public FileSyntaxTree(string filename)
         {
             FileName = filename;
-            Body = new BlockSyntax(1, 1);
-            Usings = new List<UsingSyntax>();
         }
     }
 }

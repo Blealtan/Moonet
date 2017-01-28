@@ -374,6 +374,8 @@ namespace Moonet.CompilerService.Parser
             { "while", new Token(TokenType.While) },
             { "class", new Token(TokenType.Class) },
             { "using", new Token(TokenType.Using) },
+            { "Namespace", new Token(TokenType.Namespace) },
+            { "as", new Token(TokenType.As) },
             { "new", new Token(TokenType.New) },
             { "boolean", new Token(TokenType.Boolean) },
             { "integer", new Token(TokenType.Integer) },

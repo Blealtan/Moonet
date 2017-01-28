@@ -90,6 +90,8 @@ namespace Moonet.CompilerService.Parser
         // Moonet added:
         Class, // class
         Using, // using
+        Namespace, // namespace
+        As, // as
         New, // new
         Boolean, // boolean
         Integer, // integer

@@ -100,11 +100,67 @@ namespace Moonet.CompilerService.Syntax
         }
     }
 
-    public class LocalDefinitionStatementSyntax : StatementSyntax
+    public class ForStepStatementSyntax : StatementSyntax
+    {
+        public string LoopVarName { get; set; }
+
+        public ExpressionSyntax Start { get; set; }
+
+        public ExpressionSyntax End { get; set; }
+
+        public ExpressionSyntax Step { get; set; }
+
+        public ForStepStatementSyntax(int line, int colomn) : base(line, colomn)
+        {
+        }
+    }
+
+    public class ForIteratorStatementSyntax : StatementSyntax
+    {
+        public IList<string> Names { get; } = new List<string>();
+
+        public IList<ExpressionSyntax> Iterator { get; } = new List<ExpressionSyntax>();
+
+        public ForIteratorStatementSyntax(int line, int colomn) : base(line, colomn)
+        {
+        }
+    }
+
+    public class FunctionDefinitionStatementSyntax : StatementSyntax
+    {
+        /// <summary>
+        /// Should add at least one element to this list.
+        /// </summary>
+        public IList<string> ReferenceChain { get; } = new List<string>();
+
+        /// <summary>
+        /// Null for no member reference presented.
+        /// </summary>
+        public string MemberName { get; set; } = null;
+
+        public FunctionDefinitionExpressionSyntax Function { get; set; }
+
+        public FunctionDefinitionStatementSyntax(int line, int colomn) : base(line, colomn)
+        {
+        }
+    }
+
+    public class LocalFunctionDefinition : StatementSyntax
     {
         public string Name { get; set; }
 
-        public ExpressionSyntax InitExpr { get; set; }
+        public FunctionDefinitionExpressionSyntax Function { get; set; }
+
+        public LocalFunctionDefinition(int line, int colomn) : base(line, colomn)
+        {
+        }
+    }
+
+    public class LocalDefinitionStatementSyntax : StatementSyntax
+    {
+        public IList<Tuple<string, string>> Variables { get; } = new List<Tuple<string, string>>();
+
+        public IList<ExpressionSyntax> InitExpressions { get; } = new List<ExpressionSyntax>();
 
         public LocalDefinitionStatementSyntax(int line, int colomn) : base(line, colomn)
         {

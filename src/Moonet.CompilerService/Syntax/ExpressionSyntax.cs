@@ -12,39 +12,46 @@ namespace Moonet.CompilerService.Syntax
 
     public class LiteralExpressionSyntax<T> : ExpressionSyntax
     {
-        public T LiteralValue { get; set; }
+        public readonly T Value;
 
-        public LiteralExpressionSyntax(int line, int colomn) : base(line, colomn)
+        public LiteralExpressionSyntax(int line, int colomn, T value) : base(line, colomn)
         {
+            Value = value;
         }
     }
 
     public class VariableExpression : ExpressionSyntax
     {
-        public string Name { get; }
+        public readonly string Name;
 
-        public VariableExpression(int line, int colomn) : base(line, colomn)
+        public VariableExpression(int line, int colomn, string name) : base(line, colomn)
         {
+            Name = name;
         }
     }
 
     public class FunctionDefinitionExpressionSyntax : ExpressionSyntax
     {
-        public ICollection<Tuple<string, string>> Parameters { get; } = new List<Tuple<string, string>>();
+        public readonly ICollection<Tuple<string, string>> Parameters;
 
-        public BlockSyntax Body { get; set; }
+        public readonly BlockSyntax Body;
 
-        public FunctionDefinitionExpressionSyntax(int line, int colomn) : base(line, colomn)
+        public FunctionDefinitionExpressionSyntax(int line, int colomn,
+            ICollection<Tuple<string, string>> parameters,
+            BlockSyntax body) : base(line, colomn)
         {
+            Parameters = parameters;
+            Body = body;
         }
     }
 
     public class TableConstructorExpressionSyntax : ExpressionSyntax
     {
-        public ICollection<Tuple<ExpressionSyntax, ExpressionSyntax>> TableDefinition { get; } = new List<Tuple<ExpressionSyntax, ExpressionSyntax>>();
+        public readonly ICollection<Tuple<ExpressionSyntax, ExpressionSyntax>> TableDefinition;
 
-        public TableConstructorExpressionSyntax(int line, int colomn) : base(line, colomn)
+        public TableConstructorExpressionSyntax(int line, int colomn, ICollection<Tuple<ExpressionSyntax, ExpressionSyntax>> tableDefinition) : base(line, colomn)
         {
+            TableDefinition = tableDefinition;
         }
     }
 
@@ -57,36 +64,50 @@ namespace Moonet.CompilerService.Syntax
 
     public class BinaryOperatorExpressionSyntax : ExpressionSyntax
     {
-        public BinaryOperator Operator { get; set; }
+        public readonly BinaryOperator Operator;
 
-        public ExpressionSyntax LHS { get; set; }
+        public readonly ExpressionSyntax LHS;
 
-        public ExpressionSyntax RHS { get; set; }
+        public readonly ExpressionSyntax RHS;
 
-        public BinaryOperatorExpressionSyntax(int line, int colomn) : base(line, colomn)
+        public BinaryOperatorExpressionSyntax(int line, int colomn,
+            BinaryOperator op,
+            ExpressionSyntax lhs,
+            ExpressionSyntax rhs) : base(line, colomn)
         {
+            Operator = op;
+            lhs = LHS;
+            rhs = RHS;
         }
     }
 
     public class UnaryOperatorExpressionSyntax : ExpressionSyntax
     {
-        public UnaryOperator Operator { get; set; }
+        public readonly UnaryOperator Operator;
 
-        public ExpressionSyntax RHS { get; set; }
+        public readonly ExpressionSyntax RHS;
 
-        public UnaryOperatorExpressionSyntax(int line, int colomn) : base(line, colomn)
+        public UnaryOperatorExpressionSyntax(int line, int colomn,
+            UnaryOperator op,
+            ExpressionSyntax rhs) : base(line, colomn)
         {
+            Operator = op;
+            RHS = rhs;
         }
     }
 
     public class FunctionCallExpressionSyntax : ExpressionSyntax
     {
-        public ExpressionSyntax Function { get; set; }
+        public readonly ExpressionSyntax Function;
 
-        public ICollection<ExpressionSyntax> Arguments { get; } = new List<ExpressionSyntax>();
+        public readonly ICollection<ExpressionSyntax> Arguments;
 
-        public FunctionCallExpressionSyntax(int line, int colomn) : base(line, colomn)
+        public FunctionCallExpressionSyntax(int line, int colomn,
+            ExpressionSyntax function,
+            ICollection<ExpressionSyntax> arguments) : base(line, colomn)
         {
+            Function = function;
+            Arguments = arguments;
         }
     }
 }

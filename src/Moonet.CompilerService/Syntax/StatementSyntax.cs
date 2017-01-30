@@ -12,30 +12,36 @@ namespace Moonet.CompilerService.Syntax
 
     public class AssignmentStatementSyntax : StatementSyntax
     {
-        public ICollection<string> Variables { get; } = new List<string>();
+        public readonly ICollection<string> Variables;
 
-        public ICollection<ExpressionSyntax> Expressions { get; } = new List<ExpressionSyntax>();
+        public readonly ICollection<ExpressionSyntax> Expressions;
 
-        public AssignmentStatementSyntax(int line, int colomn) : base(line, colomn)
+        public AssignmentStatementSyntax(int line, int colomn,
+            ICollection<string> variables,
+            ICollection<ExpressionSyntax> expressions) : base(line, colomn)
         {
+            Variables = variables;
+            Expressions = expressions;
         }
     }
 
     public class FunctionCallStatementSyntax : StatementSyntax
     {
-        public FunctionCallExpressionSyntax CallExpression { get; set; }
+        public readonly FunctionCallExpressionSyntax CallExpression;
 
-        public FunctionCallStatementSyntax(int line, int colomn) : base(line, colomn)
+        public FunctionCallStatementSyntax(int line, int colomn, FunctionCallExpressionSyntax callExpression) : base(line, colomn)
         {
+            CallExpression = callExpression;
         }
     }
 
     public class LabelStatementSyntax : StatementSyntax
     {
-        public string Label { get; set; }
+        public readonly string Label;
 
-        public LabelStatementSyntax(int line, int colomn) : base(line, colomn)
+        public LabelStatementSyntax(int line, int colomn, string label) : base(line, colomn)
         {
+            Label = label;
         }
     }
 
@@ -48,81 +54,101 @@ namespace Moonet.CompilerService.Syntax
 
     public class GoToStatementSyntax : StatementSyntax
     {
-        public string Label { get; set; }
+        public readonly string Label;
 
-        public GoToStatementSyntax(int line, int colomn) : base(line, colomn)
+        public GoToStatementSyntax(int line, int colomn, string label) : base(line, colomn)
         {
+            Label = label;
         }
     }
 
     public class DoBlockStatementSyntax : StatementSyntax
     {
-        public BlockSyntax Body { get; set; }
+        public readonly BlockSyntax Body;
 
-        public DoBlockStatementSyntax(int line, int colomn) : base(line, colomn)
+        public DoBlockStatementSyntax(int line, int colomn, BlockSyntax body) : base(line, colomn)
         {
+            Body = body;
         }
     }
 
     public class WhileLoopStatementSyntax : StatementSyntax
     {
-        public ExpressionSyntax Condition { get; set; }
+        public readonly ExpressionSyntax Condition;
 
-        public BlockSyntax Body { get; set; }
+        public readonly BlockSyntax Body;
 
-        public WhileLoopStatementSyntax(int line, int colomn) : base(line, colomn)
+        public WhileLoopStatementSyntax(int line, int colomn, ExpressionSyntax condition, BlockSyntax body) : base(line, colomn)
         {
+            Condition = condition;
+            Body = body;
         }
     }
 
     public class RepeatLoopStatementSyntax : StatementSyntax
     {
-        public BlockSyntax Body { get; set; }
+        public readonly BlockSyntax Body;
 
-        public ExpressionSyntax Condition { get; set; }
+        public readonly ExpressionSyntax Condition;
 
-        public RepeatLoopStatementSyntax(int line, int colomn) : base(line, colomn)
+        public RepeatLoopStatementSyntax(int line, int colomn, BlockSyntax body, ExpressionSyntax condition) : base(line, colomn)
         {
+            Body = body;
+            Condition = condition;
         }
     }
 
     public class IfStatementSyntax : StatementSyntax
     {
-        public IList<Tuple<ExpressionSyntax, BlockSyntax>> Conditions { get; } = new List<Tuple<ExpressionSyntax, BlockSyntax>>();
+        public readonly IList<Tuple<ExpressionSyntax, BlockSyntax>> Conditions;
 
         /// <summary>
         /// Null for no else presented.
         /// </summary>
-        public BlockSyntax ElseBody { get; set; }
+        public readonly BlockSyntax ElseBody;
 
-        public IfStatementSyntax(int line, int colomn) : base(line, colomn)
+        public IfStatementSyntax(int line, int colomn, IList<Tuple<ExpressionSyntax, BlockSyntax>> conditions, BlockSyntax elseBody = null) : base(line, colomn)
         {
+            Conditions = conditions;
+            ElseBody = elseBody;
         }
     }
 
     public class ForStepStatementSyntax : StatementSyntax
     {
-        public string LoopVarName { get; set; }
+        public readonly string LoopVarName;
 
-        public ExpressionSyntax Start { get; set; }
+        public readonly ExpressionSyntax Start;
 
-        public ExpressionSyntax End { get; set; }
+        public readonly ExpressionSyntax End;
 
-        public ExpressionSyntax Step { get; set; }
+        public readonly ExpressionSyntax Step;
 
-        public ForStepStatementSyntax(int line, int colomn) : base(line, colomn)
+        public ForStepStatementSyntax(int line, int colomn,
+            string loopVarName,
+            ExpressionSyntax start,
+            ExpressionSyntax end,
+            ExpressionSyntax step) : base(line, colomn)
         {
+            LoopVarName = loopVarName;
+            Start = start;
+            End = end;
+            Step = step;
         }
     }
 
     public class ForIteratorStatementSyntax : StatementSyntax
     {
-        public IList<string> Names { get; } = new List<string>();
+        public readonly IList<string> Names;
 
-        public IList<ExpressionSyntax> Iterator { get; } = new List<ExpressionSyntax>();
+        public readonly IList<ExpressionSyntax> Iterator;
 
-        public ForIteratorStatementSyntax(int line, int colomn) : base(line, colomn)
+        public ForIteratorStatementSyntax(int line, int colomn,
+            IList<string> names,
+            IList<ExpressionSyntax> iterator) : base(line, colomn)
         {
+            Names = names;
+            Iterator = iterator;
         }
     }
 
@@ -131,39 +157,53 @@ namespace Moonet.CompilerService.Syntax
         /// <summary>
         /// Should add at least one element to this list.
         /// </summary>
-        public IList<string> ReferenceChain { get; } = new List<string>();
+        public readonly IList<string> ReferenceChain;
 
         /// <summary>
         /// Null for no member reference presented.
         /// </summary>
-        public string MemberName { get; set; } = null;
+        public readonly string MemberName;
 
-        public FunctionDefinitionExpressionSyntax Function { get; set; }
+        public readonly FunctionDefinitionExpressionSyntax Function;
 
-        public FunctionDefinitionStatementSyntax(int line, int colomn) : base(line, colomn)
+        public FunctionDefinitionStatementSyntax(int line, int colomn,
+            IList<string> referenceChain,
+            string memberName,
+            FunctionDefinitionExpressionSyntax function) : base(line, colomn)
         {
+            ReferenceChain = referenceChain;
+            MemberName = memberName;
+            Function = function;
         }
     }
 
     public class LocalFunctionDefinition : StatementSyntax
     {
-        public string Name { get; set; }
+        public readonly string Name;
 
-        public FunctionDefinitionExpressionSyntax Function { get; set; }
+        public readonly FunctionDefinitionExpressionSyntax Function;
 
-        public LocalFunctionDefinition(int line, int colomn) : base(line, colomn)
+        public LocalFunctionDefinition(int line, int colomn,
+            string name,
+            FunctionDefinitionExpressionSyntax function) : base(line, colomn)
         {
+            Name = name;
+            Function = function;
         }
     }
 
     public class LocalDefinitionStatementSyntax : StatementSyntax
     {
-        public IList<Tuple<string, string>> Variables { get; } = new List<Tuple<string, string>>();
+        public readonly IList<Tuple<string, string>> Variables;
 
-        public IList<ExpressionSyntax> InitExpressions { get; } = new List<ExpressionSyntax>();
+        public readonly IList<ExpressionSyntax> InitExpressions;
 
-        public LocalDefinitionStatementSyntax(int line, int colomn) : base(line, colomn)
+        public LocalDefinitionStatementSyntax(int line, int colomn,
+            IList<Tuple<string, string>> variables,
+            IList<ExpressionSyntax> initExpressions) : base(line, colomn)
         {
+            Variables = variables;
+            InitExpressions = initExpressions;
         }
     }
 }

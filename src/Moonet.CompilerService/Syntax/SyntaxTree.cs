@@ -4,14 +4,19 @@ namespace Moonet.CompilerService.Syntax
 {
     public class SyntaxTree
     {
-        public ICollection<UsingSyntax> Usings { get; } = new List<UsingSyntax>();
+        public readonly ICollection<UsingSyntax> Usings;
 
-        public BlockSyntax Body { get; } = new BlockSyntax(1, 1);
+        public readonly BlockSyntax Body;
 
-        //!TODO: Class definitions
+        public readonly ICollection<ClassDefinitionSyntax> Classes;
 
-        public SyntaxTree()
+        public SyntaxTree(ICollection<UsingSyntax> usings,
+            BlockSyntax body,
+            ICollection<ClassDefinitionSyntax> classes)
         {
+            Usings = usings;
+            Body = body;
+            Classes = classes;
         }
     }
 }

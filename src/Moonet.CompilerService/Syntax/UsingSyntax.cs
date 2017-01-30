@@ -9,7 +9,7 @@
 
     public class UsingNamespaceSyntax : UsingSyntax
     {
-        public string Namespace { get; }
+        public readonly string Namespace;
 
         public UsingNamespaceSyntax(int line, int colomn, string namespace_) : base(line, colomn)
         {
@@ -19,9 +19,9 @@
 
     public class UsingFileSyntax : UsingSyntax
     {
-        public string UsingFileName { get; }
+        public readonly string UsingFileName;
 
-        public string AsVar { get; }
+        public readonly string AsVar;
 
         public UsingFileSyntax(int line, int colomn, string usingFileName, string asVar) : base(line, colomn)
         {

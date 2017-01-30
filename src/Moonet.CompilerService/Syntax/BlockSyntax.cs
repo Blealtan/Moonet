@@ -5,10 +5,11 @@ namespace Moonet.CompilerService.Syntax
 
     public class BlockSyntax : SyntaxNode
     {
-        public ICollection<StatementSyntax> Statements { get; } = new List<StatementSyntax>();
+        public readonly ICollection<StatementSyntax> Statements;
 
-        public BlockSyntax(int line, int colomn) : base(line, colomn)
+        public BlockSyntax(int line, int colomn, ICollection<StatementSyntax> statements) : base(line, colomn)
         {
+            Statements = statements;
         }
     }
 }

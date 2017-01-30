@@ -4,9 +4,9 @@ namespace Moonet.CompilerService.Syntax
 {
     public abstract class SyntaxNode
     {
-        public int Line { get; }
+        public readonly int Line;
 
-        public int Colomn { get; }
+        public readonly int Colomn;
 
         public SyntaxNode(int line, int colomn)
         {

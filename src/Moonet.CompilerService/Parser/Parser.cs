@@ -45,19 +45,23 @@ namespace Moonet.CompilerService.Parser
 
         public SyntaxTree Parse()
         {
-            var tree = new SyntaxTree();
             // Start prediction
             Next();
-            if (ParseUsing(tree.Usings) && ParseBody(tree.Body))
-                return tree;
-            else return null;
+            var usings = ParseUsing();
+            if (usings == null) return null;
+
+            var (body, classes) = ParseBody();
+            if (body == null) return null;
+
+            return new SyntaxTree(usings, body, classes);
         }
 
-        private bool ParseUsing(ICollection<UsingSyntax> usings)
+        private ICollection<UsingSyntax> ParseUsing()
         {
+            var usings = new List<UsingSyntax>();
             while (Type == TokenType.Using)
             {
-                if (ErrorQueue.Count >= _maxErrors) return false;
+                if (ErrorQueue.Count >= _maxErrors) return null;
                 int line = _line, colomn = _colomn;
                 Next();
                 switch (Type)
@@ -94,10 +98,10 @@ namespace Moonet.CompilerService.Parser
                         continue;
                 }
             }
-            return true;
+            return usings;
         }
 
-        private bool ParseBody(BlockSyntax body)
+        private (BlockSyntax body, ICollection<ClassDefinitionSyntax> classes) ParseBody()
         {
             throw new NotImplementedException();
         }

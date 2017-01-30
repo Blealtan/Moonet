@@ -4,19 +4,28 @@ namespace Moonet.CompilerService.Syntax
 {
     public class ClassDefinitionSyntax : SyntaxNode
     {
-        public string Name { get; }
+        public readonly string Name;
 
-        public ICollection<string> BaseNames { get; } = new List<string>();
+        public readonly ICollection<string> BaseNames;
 
-        public ICollection<LocalDefinitionStatementSyntax> Fields { get; } = new List<LocalDefinitionStatementSyntax>();
+        public readonly ICollection<LocalDefinitionStatementSyntax> Fields;
 
-        public IDictionary<string, FunctionDefinitionExpressionSyntax> Members { get; } = new Dictionary<string, FunctionDefinitionExpressionSyntax>();
+        public readonly IDictionary<string, FunctionDefinitionExpressionSyntax> Members;
 
-        public IDictionary<string, FunctionDefinitionExpressionSyntax> StaticMembers { get; } = new Dictionary<string, FunctionDefinitionExpressionSyntax>();
+        public readonly IDictionary<string, FunctionDefinitionExpressionSyntax> StaticMembers;
 
-        public ClassDefinitionSyntax(int line, int colomn, string name) : base(line, colomn)
+        public ClassDefinitionSyntax(int line, int colomn,
+            string name,
+            ICollection<string> baseNames,
+            ICollection<LocalDefinitionStatementSyntax> fields,
+            IDictionary<string, FunctionDefinitionExpressionSyntax> members,
+            IDictionary<string, FunctionDefinitionExpressionSyntax> staticMembers) : base(line, colomn)
         {
             Name = name;
+            BaseNames = baseNames;
+            Fields = fields;
+            Members = members;
+            StaticMembers = staticMembers;
         }
     }
 }

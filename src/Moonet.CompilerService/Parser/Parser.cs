@@ -218,7 +218,7 @@ namespace Moonet.CompilerService.Parser
             return new ClassDefinitionSyntax(initLine, initColomn, name, bases, fields, members, staticMembers);
         }
 
-        private LocalFunctionDefinitionSyntax ParseLocalFunctionRest()
+        private LocalFunctionDefinitionStatementSyntax ParseLocalFunctionRest()
         {
             throw new NotImplementedException();
         }

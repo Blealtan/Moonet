@@ -177,13 +177,13 @@ namespace Moonet.CompilerService.Syntax
         }
     }
 
-    public class LocalFunctionDefinition : StatementSyntax
+    public class LocalFunctionDefinitionSyntax : StatementSyntax
     {
         public readonly string Name;
 
         public readonly FunctionDefinitionExpressionSyntax Function;
 
-        public LocalFunctionDefinition(int line, int colomn,
+        public LocalFunctionDefinitionSyntax(int line, int colomn,
             string name,
             FunctionDefinitionExpressionSyntax function) : base(line, colomn)
         {

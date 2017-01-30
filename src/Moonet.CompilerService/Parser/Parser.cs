@@ -111,11 +111,11 @@ namespace Moonet.CompilerService.Parser
 
         private (BlockSyntax body, ICollection<ClassDefinitionSyntax> classes) ParseBody()
         {
-            var statements = new List<StatementSyntax>();
-            var classes = new List<ClassDefinitionSyntax>();
-
             var initLine = _line;
             var initColomn = _colomn;
+
+            var statements = new List<StatementSyntax>();
+            var classes = new List<ClassDefinitionSyntax>();
 
             while (Type != TokenType.EndOfFile)
             {
@@ -130,6 +130,9 @@ namespace Moonet.CompilerService.Parser
 
         private ClassDefinitionSyntax ParseClass()
         {
+            var initLine = _line;
+            var initColomn = _colomn;
+
             Next(); // Eat 'class'
 
             // Process class name
@@ -157,12 +160,77 @@ namespace Moonet.CompilerService.Parser
                     }
                 } while (Type == TokenType.Comma);
             }
-            
+
             // Process members
+            var fields = new List<LocalDefinitionStatementSyntax>();
+            var members = new Dictionary<string, FunctionDefinitionExpressionSyntax>();
+            var staticMembers = new Dictionary<string, FunctionDefinitionExpressionSyntax>();
             while (Type != TokenType.End)
             {
-                throw new NotImplementedException();
+                switch (Type)
+                {
+                    case TokenType.Name:
+                        fields.AddIfNonNull(ParseLocalDefinitionRest());
+                        break;
+                    case TokenType.Function:
+                        Next();
+                        switch (Type)
+                        {
+                            case TokenType.Colon:
+                                Next();
+                                if (Type != TokenType.Name)
+                                {
+                                    AddError("Expected member name after 'function :' in class definition; ignoring this member.");
+                                    continue;
+                                }
+                                var member = StringValue;
+                                Next();
+                                var body = ParseFunctionBody();
+                                if (body != null) members.Add(member, body);
+                                break;
+                            case TokenType.Dot:
+                                Next();
+                                if (Type != TokenType.Name)
+                                {
+                                    AddError("Expected member name after 'function .' in class definition; ignoring this static member.");
+                                    continue;
+                                }
+                                var staticMember = StringValue;
+                                Next();
+                                var staticBody = ParseFunctionBody();
+                                if (staticBody != null) staticMembers.Add(staticMember, staticBody);
+                                break;
+                            default:
+                                AddError("Member function should start with ':' or '.' to specify if it's static; assuming it's a non-static member.");
+                                var f = ParseLocalFunctionRest();
+                                if (f != null) members.Add(f.Name, f.Function);
+                                break;
+                        }
+                        break;
+                    default:
+                        AddError("Member should start with either name (for fields) or 'function' (for member functions).");
+                        break;
+                }
             }
+
+            Next(); // Eat 'end'
+
+            return new ClassDefinitionSyntax(initLine, initColomn, name, bases, fields, members, staticMembers);
+        }
+
+        private LocalFunctionDefinitionSyntax ParseLocalFunctionRest()
+        {
+            throw new NotImplementedException();
+        }
+
+        private FunctionDefinitionExpressionSyntax ParseFunctionBody()
+        {
+            throw new NotImplementedException();
+        }
+
+        private LocalDefinitionStatementSyntax ParseLocalDefinitionRest()
+        {
+            throw new NotImplementedException();
         }
 
         private StatementSyntax ParseStatement()

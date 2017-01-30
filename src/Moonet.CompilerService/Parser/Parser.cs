@@ -6,6 +6,14 @@ using System.Text;
 
 namespace Moonet.CompilerService.Parser
 {
+    static class ParserHelper
+    {
+        internal static void AddIfNonNull<T>(this ICollection<T> coll, T t) where T : class
+        {
+            if (t != null) coll.Add(t);
+        }
+    }
+
     public class Parser
     {
         private int _line, _colomn;
@@ -112,9 +120,9 @@ namespace Moonet.CompilerService.Parser
             while (Type != TokenType.EndOfFile)
             {
                 if (Type == TokenType.Class)
-                    classes.Add(ParseClass());
+                    classes.AddIfNonNull(ParseClass());
                 else
-                    statements.Add(ParseStatement());
+                    statements.AddIfNonNull(ParseStatement());
             }
 
             return (new BlockSyntax(initLine, initColomn, statements), classes);
@@ -122,7 +130,39 @@ namespace Moonet.CompilerService.Parser
 
         private ClassDefinitionSyntax ParseClass()
         {
-            throw new NotImplementedException();
+            Next(); // Eat 'class'
+
+            // Process class name
+            if (Type != TokenType.Name)
+            {
+                AddError("Expected class name after 'class' in class definition; ignoring class definition.");
+                return null;
+            }
+            var name = StringValue;
+            Next(); // Eat class name
+
+            // Process base classes list
+            var bases = new List<string>();
+            if (Type == TokenType.Colon)
+            {
+                do
+                {
+                    Next();
+                    if (Type != TokenType.Name)
+                        AddError("Expected class name in super class list of a class definition; ignoring.");
+                    else
+                    {
+                        bases.Add(StringValue);
+                        Next();
+                    }
+                } while (Type == TokenType.Comma);
+            }
+            
+            // Process members
+            while (Type != TokenType.End)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private StatementSyntax ParseStatement()

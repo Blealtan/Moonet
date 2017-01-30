@@ -103,6 +103,30 @@ namespace Moonet.CompilerService.Parser
 
         private (BlockSyntax body, ICollection<ClassDefinitionSyntax> classes) ParseBody()
         {
+            var statements = new List<StatementSyntax>();
+            var classes = new List<ClassDefinitionSyntax>();
+
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            while (Type != TokenType.EndOfFile)
+            {
+                if (Type == TokenType.Class)
+                    classes.Add(ParseClass());
+                else
+                    statements.Add(ParseStatement());
+            }
+
+            return (new BlockSyntax(initLine, initColomn, statements), classes);
+        }
+
+        private ClassDefinitionSyntax ParseClass()
+        {
+            throw new NotImplementedException();
+        }
+
+        private StatementSyntax ParseStatement()
+        {
             throw new NotImplementedException();
         }
     }

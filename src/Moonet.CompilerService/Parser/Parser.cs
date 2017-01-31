@@ -121,8 +121,13 @@ namespace Moonet.CompilerService.Parser
             {
                 if (Type == TokenType.Class)
                     classes.AddIfNonNull(ParseClass());
-                else
+                else if (_statementFirst.Contains(Type))
                     statements.AddIfNonNull(ParseStatement());
+                else
+                {
+                    AddError("Unrecognized token.");
+                    Next();
+                }
             }
 
             return (new BlockSyntax(initLine, initColomn, statements), classes);
@@ -218,7 +223,180 @@ namespace Moonet.CompilerService.Parser
             return new ClassDefinitionSyntax(initLine, initColomn, name, bases, fields, members, staticMembers);
         }
 
+        private static readonly ISet<TokenType> _statementFirst = new HashSet<TokenType>()
+        {
+            TokenType.Semicolon,
+            TokenType.Name,
+            TokenType.LeftParen,
+            TokenType.LabelMark,
+            TokenType.Break,
+            TokenType.Goto,
+            TokenType.Do,
+            TokenType.While,
+            TokenType.Repeat,
+            TokenType.If,
+            TokenType.For,
+            TokenType.Function,
+            TokenType.Local
+        };
+
         private StatementSyntax ParseStatement()
+        {
+            while (true)
+                switch (Type)
+                {
+                    case TokenType.Semicolon:
+                        // Ignore
+                        continue;
+                    case TokenType.LabelMark:
+                        return ParseLabel();
+                    case TokenType.Break:
+                        return ParseBreak();
+                    case TokenType.Goto:
+                        return ParseGoto();
+                    case TokenType.Do:
+                        return ParseDoBlock();
+                    case TokenType.While:
+                        return ParseWhile();
+                    case TokenType.Repeat:
+                        return ParseRepeat();
+                    case TokenType.If:
+                        return ParseIf();
+                    case TokenType.For:
+                        return ParseFor();
+                    case TokenType.Function:
+                        return ParseNamedFunctionDef();
+                    case TokenType.Local:
+                        Next();
+                        if (Type == TokenType.Function)
+                        {
+                            Next();
+                            return ParseLocalFunctionRest();
+                        }
+                        else return ParseLocalDefinitionRest();
+                    default:
+                        // Assignment and function call.
+                        throw new NotImplementedException();
+                }
+        }
+
+        private BlockSyntax ParseBlock()
+        {
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            var statements = new List<StatementSyntax>();
+
+            while (_statementFirst.Contains(Type))
+                statements.AddIfNonNull(ParseStatement());
+
+            return new BlockSyntax(initLine, initColomn, statements);
+        }
+
+        private BreakStatement ParseBreak()
+        {
+            var breakStmt = new BreakStatement(_line, _colomn);
+            Next();
+            return breakStmt;
+        }
+
+        private DoBlockStatement ParseDoBlock()
+        {
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            Next(); // Eat 'do'
+
+            var body = ParseBlock();
+
+            if (Type != TokenType.End) AddError("Expected 'end' at end of do block; assuming you forgot to write it.");
+            else Next();
+
+            return new DoBlockStatement(initLine, initColomn, body);
+        }
+
+        private StatementSyntax ParseFor()
+        {
+            throw new NotImplementedException();
+        }
+
+        private GotoStatement ParseGoto()
+        {
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            Next(); // Eat 'goto'
+
+            if (Type != TokenType.Name)
+            {
+                AddError("Name required after 'goto'.");
+                return null;
+            }
+
+            var label = new GotoStatement(initLine, initColomn, StringValue);
+            Next();
+
+            return label;
+        }
+
+        private StatementSyntax ParseIf()
+        {
+            throw new NotImplementedException();
+        }
+
+        private LabelStatement ParseLabel()
+        {
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            Next(); // Eat the first '::'
+
+            if (Type != TokenType.Name)
+            {
+                AddError("Name required after label mark '::'.");
+                return null;
+            }
+
+            var label = new LabelStatement(initLine, initColomn, StringValue);
+            Next();
+
+            if (Type != TokenType.LabelMark) AddError("Label mark '::' required after label name; assuming you forgot to write it.");
+            else Next(); // Eat the second '::'
+
+            return label;
+        }
+
+        private StatementSyntax ParseNamedFunctionDef()
+        {
+            throw new NotImplementedException();
+        }
+
+        private StatementSyntax ParseRepeat()
+        {
+            throw new NotImplementedException();
+        }
+
+        private WhileLoopStatement ParseWhile()
+        {
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            Next(); // Eat 'while'
+
+            var condition = ParseExpression();
+
+            if (Type != TokenType.Do) AddError("Expected 'do' after condition expression in a while loop; assuming you forgot to write it.");
+            else Next();
+
+            var body = ParseBlock();
+
+            if (Type != TokenType.End) AddError("Expected 'end' at end of while loop; assuming you forgot to write it.");
+            else Next();
+
+            return new WhileLoopStatement(initLine, initColomn, condition, body);
+        }
+
+        private ExpressionSyntax ParseExpression()
         {
             throw new NotImplementedException();
         }

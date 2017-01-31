@@ -52,11 +52,11 @@ namespace Moonet.CompilerService.Syntax
         }
     }
 
-    public class GoToStatement : StatementSyntax
+    public class GotoStatement : StatementSyntax
     {
         public readonly string Label;
 
-        public GoToStatement(int line, int colomn, string label) : base(line, colomn)
+        public GotoStatement(int line, int colomn, string label) : base(line, colomn)
         {
             Label = label;
         }

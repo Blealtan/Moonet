@@ -11,9 +11,9 @@
     {
         public readonly string Namespace;
 
-        public UsingNamespaceSyntax(int line, int colomn, string namespace_) : base(line, colomn)
+        public UsingNamespaceSyntax(int line, int colomn, string @namespace) : base(line, colomn)
         {
-            Namespace = namespace_;
+            Namespace = @namespace;
         }
     }
 

@@ -20,13 +20,13 @@ namespace Moonet.CompilerService.Parser
 
         private Token _current;
 
-        private TokenType Type { get => _current.Type; }
+        private TokenType Type => _current.Type;
 
-        private int IntegerValue { get => (_current as Token<int>).Value; }
+        private int IntegerValue => (_current as Token<int>).Value;
 
-        private double FloatValue { get => (_current as Token<double>).Value; }
+        private double FloatValue => (_current as Token<double>).Value;
 
-        private string StringValue { get => (_current as Token<string>).Value; }
+        private string StringValue => (_current as Token<string>).Value;
 
         private Lexer _lexer;
 

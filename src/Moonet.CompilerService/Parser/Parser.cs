@@ -366,9 +366,40 @@ namespace Moonet.CompilerService.Parser
             return label;
         }
 
-        private StatementSyntax ParseNamedFunctionDef()
+        private FunctionDefinitionStatement ParseNamedFunctionDef()
         {
-            throw new NotImplementedException();
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            Next(); // Eat 'function'
+
+            var referenceChain = new List<string>();
+            var memberName = null as string;
+            while (Type == TokenType.Name)
+            {
+                referenceChain.Add(StringValue);
+                if (Type == TokenType.Dot) Next();
+                else if (Type == TokenType.Colon)
+                {
+                    Next();
+                    if (Type != TokenType.Name) AddError("Expected member name after ':' in function name.");
+                    else
+                    {
+                        memberName = StringValue;
+                        Next();
+                    }
+                    continue;
+                }
+                else
+                {
+                    AddError("Expected '.' or ':' in named function definition between referecing names.");
+                    return null;
+                }
+            }
+
+            var function = ParseFunctionBody();
+
+            return new FunctionDefinitionStatement(initLine, initColomn, referenceChain, memberName, function);
         }
 
         private StatementSyntax ParseRepeat()
@@ -396,12 +427,60 @@ namespace Moonet.CompilerService.Parser
             return new WhileLoopStatement(initLine, initColomn, condition, body);
         }
 
-        private ExpressionSyntax ParseExpression()
+        private FunctionDefinitionExpression ParseFunctionBody()
         {
-            throw new NotImplementedException();
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            if (Type != TokenType.LeftParen)
+            {
+                AddError("Expected '(' after function name.");
+                return null;
+            }
+            else Next();
+
+            var parameters = new List<Tuple<string, string>>();
+            while (Type == TokenType.Name)
+            {
+                var name = StringValue;
+                var type = null as string;
+                Next();
+                if (Type == TokenType.Colon)
+                {
+                    Next();
+                    if (Type != TokenType.Name) AddError("Expected type name after ':' in function parameters.");
+                    else
+                    {
+                        type = StringValue;
+                        Next();
+                    }
+                }
+                if (Type == TokenType.Comma)
+                    Next();
+                else if (Type == TokenType.Assign)
+                    AddError("Default value in parameter list not supported.");
+                else break;
+            }
+
+            var hasVarArgs = false;
+            if (Type == TokenType.VarArg)
+            {
+                hasVarArgs = true;
+                Next();
+            }
+
+            if (Type != TokenType.RightParen) AddError("Expected ')' after parameter list; assuming you forgot to write it.");
+            else Next();
+
+            var body = ParseBlock();
+
+            if (Type != TokenType.End) AddError("Expected 'end' at end of while loop; assuming you forgot to write it.");
+            else Next();
+
+            return new FunctionDefinitionExpression(initLine, initColomn, parameters, hasVarArgs, body);
         }
 
-        private FunctionDefinitionExpression ParseFunctionBody()
+        private ExpressionSyntax ParseExpression()
         {
             throw new NotImplementedException();
         }

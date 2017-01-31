@@ -69,15 +69,19 @@ namespace Moonet.CompilerService.Syntax
 
     public class FunctionDefinitionExpression : ExpressionSyntax
     {
-        public readonly ICollection<Tuple<string, string>> Parameters;
+        public readonly IList<Tuple<string, string>> Parameters;
+
+        public readonly bool HasVarArgs;
 
         public readonly BlockSyntax Body;
 
         public FunctionDefinitionExpression(int line, int colomn,
-            ICollection<Tuple<string, string>> parameters,
+            IList<Tuple<string, string>> parameters,
+            bool hasVarArgs,
             BlockSyntax body) : base(line, colomn)
         {
             Parameters = parameters;
+            HasVarArgs = hasVarArgs;
             Body = body;
         }
     }

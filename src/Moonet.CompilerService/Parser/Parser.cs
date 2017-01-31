@@ -315,9 +315,73 @@ namespace Moonet.CompilerService.Parser
             return new DoBlockStatement(initLine, initColomn, body);
         }
 
-        private StatementSyntax ParseFor()
+        private ForStatement ParseFor()
         {
-            throw new NotImplementedException();
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            Next(); // Eat 'for'
+
+            if (Type != TokenType.Name)
+            {
+                AddError("Expected variable name after 'for' in a for loop statement.");
+                return null;
+            }
+
+            var first = StringValue;
+            Next();
+
+            if (Type == TokenType.Assign)
+            {
+                var start = ParseExpression();
+                if (Type != TokenType.Comma) AddError("Expected ',' after start expression in for loop.");
+                else Next();
+
+                var end = ParseExpression();
+
+                var step = null as ExpressionSyntax;
+                if (Type == TokenType.Comma)
+                {
+                    Next();
+                    step = ParseExpression();
+                }
+                return new ForStepStatement(initLine, initColomn, first, start, end, step);
+            }
+            else if (Type == TokenType.Comma || Type == TokenType.In)
+            {
+                var names = new List<string>() { first };
+                while (Type != TokenType.In)
+                {
+                    if (Type != TokenType.Comma) AddError("Expected ',' after a variable name in the loop variable list of for loop.");
+                    else Next();
+                    if (Type != TokenType.Name)
+                    {
+                        AddError("Expected variable name in the loop variable list of for loop.");
+                        return null;
+                    }
+                    names.Add(StringValue);
+                }
+                Next();
+                var iterator = new List<ExpressionSyntax>();
+                ExpressionSyntax e;
+                while ((e = ParseExpression()) != null)
+                {
+                    iterator.Add(e);
+                    if (Type != TokenType.Comma) break;
+                    else Next();
+                }
+                if (Type != TokenType.Do)
+                {
+                    AddError("Illegal for by iterator loop.");
+                    return null;
+                }
+                return new ForIteratorStatement(initLine, initColomn, names, iterator);
+            }
+            else
+            {
+                AddError("Unrecognized for loop.");
+                return null;
+            }
         }
 
         private GotoStatement ParseGoto()

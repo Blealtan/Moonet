@@ -114,7 +114,14 @@ namespace Moonet.CompilerService.Syntax
         }
     }
 
-    public class ForStepStatement : StatementSyntax
+    public class ForStatement : StatementSyntax
+    {
+        public ForStatement(int line, int colomn) : base(line, colomn)
+        {
+        }
+    }
+
+    public class ForStepStatement : ForStatement
     {
         public readonly string LoopVarName;
 
@@ -137,7 +144,7 @@ namespace Moonet.CompilerService.Syntax
         }
     }
 
-    public class ForIteratorStatement : StatementSyntax
+    public class ForIteratorStatement : ForStatement
     {
         public readonly IList<string> Names;
 

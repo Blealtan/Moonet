@@ -162,9 +162,9 @@ namespace Moonet.CompilerService.Parser
             }
 
             // Process members
-            var fields = new List<LocalDefinitionStatementSyntax>();
-            var members = new Dictionary<string, FunctionDefinitionExpressionSyntax>();
-            var staticMembers = new Dictionary<string, FunctionDefinitionExpressionSyntax>();
+            var fields = new List<LocalDefinitionStatement>();
+            var members = new Dictionary<string, FunctionDefinitionExpression>();
+            var staticMembers = new Dictionary<string, FunctionDefinitionExpression>();
             while (Type != TokenType.End)
             {
                 switch (Type)
@@ -218,22 +218,22 @@ namespace Moonet.CompilerService.Parser
             return new ClassDefinitionSyntax(initLine, initColomn, name, bases, fields, members, staticMembers);
         }
 
-        private LocalFunctionDefinitionStatementSyntax ParseLocalFunctionRest()
-        {
-            throw new NotImplementedException();
-        }
-
-        private FunctionDefinitionExpressionSyntax ParseFunctionBody()
-        {
-            throw new NotImplementedException();
-        }
-
-        private LocalDefinitionStatementSyntax ParseLocalDefinitionRest()
-        {
-            throw new NotImplementedException();
-        }
-
         private StatementSyntax ParseStatement()
+        {
+            throw new NotImplementedException();
+        }
+
+        private FunctionDefinitionExpression ParseFunctionBody()
+        {
+            throw new NotImplementedException();
+        }
+
+        private LocalDefinitionStatement ParseLocalDefinitionRest()
+        {
+            throw new NotImplementedException();
+        }
+
+        private LocalFunctionDefinitionStatement ParseLocalFunctionRest()
         {
             throw new NotImplementedException();
         }

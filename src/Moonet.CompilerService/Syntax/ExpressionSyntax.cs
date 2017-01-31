@@ -20,23 +20,60 @@ namespace Moonet.CompilerService.Syntax
         }
     }
 
-    public class VariableExpression : ExpressionSyntax
+    public abstract class VariableExpression : ExpressionSyntax
+    {
+        public VariableExpression(int line, int colomn) : base(line, colomn)
+        {
+        }
+    }
+
+    public class StandaloneVariableExpression : VariableExpression
     {
         public readonly string Name;
 
-        public VariableExpression(int line, int colomn, string name) : base(line, colomn)
+        public StandaloneVariableExpression(int line, int colomn, string name) : base(line, colomn)
         {
             Name = name;
         }
     }
 
-    public class FunctionDefinitionExpressionSyntax : ExpressionSyntax
+    public class IndexedVariableExpression : VariableExpression
+    {
+        public readonly ExpressionSyntax Table;
+
+        public readonly ExpressionSyntax Key;
+
+        public IndexedVariableExpression(int line, int colomn,
+            ExpressionSyntax table,
+            ExpressionSyntax key) : base(line, colomn)
+        {
+            Table = table;
+            Key = key;
+        }
+    }
+
+    public class FieldIndexedVariableExpression : VariableExpression
+    {
+        public readonly ExpressionSyntax Table;
+
+        public readonly string Key;
+
+        public FieldIndexedVariableExpression(int line, int colomn,
+            ExpressionSyntax table,
+            string key) : base(line, colomn)
+        {
+            Table = table;
+            Key = key;
+        }
+    }
+
+    public class FunctionDefinitionExpression : ExpressionSyntax
     {
         public readonly ICollection<Tuple<string, string>> Parameters;
 
         public readonly BlockSyntax Body;
 
-        public FunctionDefinitionExpressionSyntax(int line, int colomn,
+        public FunctionDefinitionExpression(int line, int colomn,
             ICollection<Tuple<string, string>> parameters,
             BlockSyntax body) : base(line, colomn)
         {
@@ -45,24 +82,24 @@ namespace Moonet.CompilerService.Syntax
         }
     }
 
-    public class TableConstructorExpressionSyntax : ExpressionSyntax
+    public class TableConstructorExpression : ExpressionSyntax
     {
         public readonly ICollection<Tuple<ExpressionSyntax, ExpressionSyntax>> TableDefinition;
 
-        public TableConstructorExpressionSyntax(int line, int colomn, ICollection<Tuple<ExpressionSyntax, ExpressionSyntax>> tableDefinition) : base(line, colomn)
+        public TableConstructorExpression(int line, int colomn, ICollection<Tuple<ExpressionSyntax, ExpressionSyntax>> tableDefinition) : base(line, colomn)
         {
             TableDefinition = tableDefinition;
         }
     }
 
-    public class VarArgExpressionSyntax : ExpressionSyntax
+    public class VarArgExpression : ExpressionSyntax
     {
-        public VarArgExpressionSyntax(int line, int colomn) : base(line, colomn)
+        public VarArgExpression(int line, int colomn) : base(line, colomn)
         {
         }
     }
 
-    public class BinaryOperatorExpressionSyntax : ExpressionSyntax
+    public class BinaryOperatorExpression : ExpressionSyntax
     {
         public readonly BinaryOperator Operator;
 
@@ -70,7 +107,7 @@ namespace Moonet.CompilerService.Syntax
 
         public readonly ExpressionSyntax RHS;
 
-        public BinaryOperatorExpressionSyntax(int line, int colomn,
+        public BinaryOperatorExpression(int line, int colomn,
             BinaryOperator op,
             ExpressionSyntax lhs,
             ExpressionSyntax rhs) : base(line, colomn)
@@ -81,13 +118,13 @@ namespace Moonet.CompilerService.Syntax
         }
     }
 
-    public class UnaryOperatorExpressionSyntax : ExpressionSyntax
+    public class UnaryOperatorExpression : ExpressionSyntax
     {
         public readonly UnaryOperator Operator;
 
         public readonly ExpressionSyntax RHS;
 
-        public UnaryOperatorExpressionSyntax(int line, int colomn,
+        public UnaryOperatorExpression(int line, int colomn,
             UnaryOperator op,
             ExpressionSyntax rhs) : base(line, colomn)
         {
@@ -96,13 +133,13 @@ namespace Moonet.CompilerService.Syntax
         }
     }
 
-    public class FunctionCallExpressionSyntax : ExpressionSyntax
+    public class FunctionCallExpression : ExpressionSyntax
     {
         public readonly ExpressionSyntax Function;
 
         public readonly ICollection<ExpressionSyntax> Arguments;
 
-        public FunctionCallExpressionSyntax(int line, int colomn,
+        public FunctionCallExpression(int line, int colomn,
             ExpressionSyntax function,
             ICollection<ExpressionSyntax> arguments) : base(line, colomn)
         {

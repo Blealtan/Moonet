@@ -16,7 +16,7 @@ namespace Moonet.CompilerService.Parser
 
     public class Parser
     {
-        #region LexerHelper
+        #region Lexer Helper
         private int _line, _colomn;
 
         private Token _current;
@@ -37,7 +37,7 @@ namespace Moonet.CompilerService.Parser
         }
         #endregion
 
-        #region ErrorHelper
+        #region Error Helper
         public Queue<Error> ErrorQueue { get; }
 
         private readonly int _maxErrors;

@@ -16,6 +16,7 @@ namespace Moonet.CompilerService.Parser
 
     public class Parser
     {
+        #region LexerHelper
         private int _line, _colomn;
 
         private Token _current;
@@ -34,7 +35,9 @@ namespace Moonet.CompilerService.Parser
         {
             (_line, _colomn, _current) = _lexer.AnalyzeNextToken();
         }
+        #endregion
 
+        #region ErrorHelper
         public Queue<Error> ErrorQueue { get; }
 
         private readonly int _maxErrors;
@@ -43,6 +46,7 @@ namespace Moonet.CompilerService.Parser
         {
             ErrorQueue.Enqueue(new Error(_line, _colomn, _lexer.CurrentLine, message));
         }
+        #endregion
 
         public Parser(TextReader src, int maxErrors)
         {
@@ -223,6 +227,20 @@ namespace Moonet.CompilerService.Parser
             return new ClassDefinitionSyntax(initLine, initColomn, name, bases, fields, members, staticMembers);
         }
 
+        private BlockSyntax ParseBlock()
+        {
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            var statements = new List<StatementSyntax>();
+
+            while (_statementFirst.Contains(Type))
+                statements.AddIfNonNull(ParseStatement());
+
+            return new BlockSyntax(initLine, initColomn, statements);
+        }
+
+        #region Statement Parsing
         private static readonly ISet<TokenType> _statementFirst = new HashSet<TokenType>()
         {
             TokenType.Semicolon,
@@ -278,19 +296,6 @@ namespace Moonet.CompilerService.Parser
                         // Assignment and function call.
                         throw new NotImplementedException();
                 }
-        }
-
-        private BlockSyntax ParseBlock()
-        {
-            var initLine = _line;
-            var initColomn = _colomn;
-
-            var statements = new List<StatementSyntax>();
-
-            while (_statementFirst.Contains(Type))
-                statements.AddIfNonNull(ParseStatement());
-
-            return new BlockSyntax(initLine, initColomn, statements);
         }
 
         private BreakStatement ParseBreak()
@@ -453,6 +458,16 @@ namespace Moonet.CompilerService.Parser
             return label;
         }
 
+        private LocalDefinitionStatement ParseLocalDefinitionRest()
+        {
+            throw new NotImplementedException();
+        }
+
+        private LocalFunctionDefinitionStatement ParseLocalFunctionRest()
+        {
+            throw new NotImplementedException();
+        }
+
         private FunctionDefinitionStatement ParseNamedFunctionDef()
         {
             var initLine = _line;
@@ -489,7 +504,7 @@ namespace Moonet.CompilerService.Parser
             return new FunctionDefinitionStatement(initLine, initColomn, referenceChain, memberName, function);
         }
 
-        private StatementSyntax ParseRepeat()
+        private RepeatLoopStatement ParseRepeat()
         {
             var initLine = _line;
             var initColomn = _colomn;
@@ -505,7 +520,7 @@ namespace Moonet.CompilerService.Parser
 
             if (condition is null)
                 AddError("Unrecognized condition expression for repeat-until loop.");
-            
+
             return new RepeatLoopStatement(initLine, initColomn, body, condition);
         }
 
@@ -527,6 +542,13 @@ namespace Moonet.CompilerService.Parser
             else Next();
 
             return new WhileLoopStatement(initLine, initColomn, condition, body);
+        }
+        #endregion
+
+        #region Expression Parsing
+        private ExpressionSyntax ParseExpression()
+        {
+            throw new NotImplementedException();
         }
 
         private FunctionDefinitionExpression ParseFunctionBody()
@@ -582,20 +604,6 @@ namespace Moonet.CompilerService.Parser
 
             return new FunctionDefinitionExpression(initLine, initColomn, parameters, hasVarArgs, body);
         }
-
-        private ExpressionSyntax ParseExpression()
-        {
-            throw new NotImplementedException();
-        }
-
-        private LocalDefinitionStatement ParseLocalDefinitionRest()
-        {
-            throw new NotImplementedException();
-        }
-
-        private LocalFunctionDefinitionStatement ParseLocalFunctionRest()
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
     }
 }

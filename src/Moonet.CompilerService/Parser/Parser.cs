@@ -491,7 +491,22 @@ namespace Moonet.CompilerService.Parser
 
         private StatementSyntax ParseRepeat()
         {
-            throw new NotImplementedException();
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            Next(); // Eat 'repeat'
+
+            var body = ParseBlock();
+
+            if (Type != TokenType.Until) AddError("Expected 'until' at end of a repeat block; assuming you forgot to write it.");
+            else Next();
+
+            var condition = ParseExpression();
+
+            if (condition is null)
+                AddError("Unrecognized condition expression for repeat-until loop.");
+            
+            return new RepeatLoopStatement(initLine, initColomn, body, condition);
         }
 
         private WhileLoopStatement ParseWhile()

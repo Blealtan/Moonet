@@ -100,14 +100,14 @@ namespace Moonet.CompilerService.Syntax
 
     public class IfStatement : StatementSyntax
     {
-        public readonly IList<Tuple<ExpressionSyntax, BlockSyntax>> Conditions;
+        public readonly IList<(ExpressionSyntax, BlockSyntax)> Conditions;
 
         /// <summary>
         /// Null for no else presented.
         /// </summary>
         public readonly BlockSyntax ElseBody;
 
-        public IfStatement(int line, int colomn, IList<Tuple<ExpressionSyntax, BlockSyntax>> conditions, BlockSyntax elseBody = null) : base(line, colomn)
+        public IfStatement(int line, int colomn, IList<(ExpressionSyntax, BlockSyntax)> conditions, BlockSyntax elseBody = null) : base(line, colomn)
         {
             Conditions = conditions;
             ElseBody = elseBody;
@@ -201,12 +201,12 @@ namespace Moonet.CompilerService.Syntax
 
     public class LocalDefinitionStatement : StatementSyntax
     {
-        public readonly IList<Tuple<string, string>> Variables;
+        public readonly IList<(string, string)> Variables;
 
         public readonly IList<ExpressionSyntax> InitExpressions;
 
         public LocalDefinitionStatement(int line, int colomn,
-            IList<Tuple<string, string>> variables,
+            IList<(string, string)> variables,
             IList<ExpressionSyntax> initExpressions) : base(line, colomn)
         {
             Variables = variables;

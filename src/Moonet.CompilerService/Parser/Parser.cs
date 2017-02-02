@@ -403,9 +403,32 @@ namespace Moonet.CompilerService.Parser
             return label;
         }
 
-        private StatementSyntax ParseIf()
+        private IfStatement ParseIf()
         {
-            throw new NotImplementedException();
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            var conditions = new List<(ExpressionSyntax, BlockSyntax)>();
+
+            do
+            {
+                Next(); // Eat 'if' or 'elseif'
+                var condExpr = ParseExpression();
+                if (Type != TokenType.Then)
+                    AddError("Expected 'then' after condition expression in if statement.");
+                var condBody = ParseBlock();
+                conditions.Add((condExpr, condBody));
+            } while (Type == TokenType.Elseif);
+
+            var elseBody = null as BlockSyntax;
+
+            if (Type == TokenType.Else)
+                elseBody = ParseBlock();
+
+            if (Type != TokenType.End)
+                AddError("Expected 'end' after if statement.");
+
+            return new IfStatement(initLine, initColomn, conditions, elseBody);
         }
 
         private LabelStatement ParseLabel()
@@ -503,7 +526,7 @@ namespace Moonet.CompilerService.Parser
             }
             else Next();
 
-            var parameters = new List<Tuple<string, string>>();
+            var parameters = new List<(string, string)>();
             while (Type == TokenType.Name)
             {
                 var name = StringValue;
@@ -519,6 +542,7 @@ namespace Moonet.CompilerService.Parser
                         Next();
                     }
                 }
+                parameters.Add((name, type));
                 if (Type == TokenType.Comma)
                     Next();
                 else if (Type == TokenType.Assign)

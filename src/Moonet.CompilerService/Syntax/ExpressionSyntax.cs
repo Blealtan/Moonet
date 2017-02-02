@@ -69,14 +69,14 @@ namespace Moonet.CompilerService.Syntax
 
     public class FunctionDefinitionExpression : ExpressionSyntax
     {
-        public readonly IList<Tuple<string, string>> Parameters;
+        public readonly IList<(string, string)> Parameters;
 
         public readonly bool HasVarArgs;
 
         public readonly BlockSyntax Body;
 
         public FunctionDefinitionExpression(int line, int colomn,
-            IList<Tuple<string, string>> parameters,
+            IList<(string, string)> parameters,
             bool hasVarArgs,
             BlockSyntax body) : base(line, colomn)
         {
@@ -88,9 +88,9 @@ namespace Moonet.CompilerService.Syntax
 
     public class TableConstructorExpression : ExpressionSyntax
     {
-        public readonly ICollection<Tuple<ExpressionSyntax, ExpressionSyntax>> TableDefinition;
+        public readonly ICollection<(ExpressionSyntax, ExpressionSyntax)> TableDefinition;
 
-        public TableConstructorExpression(int line, int colomn, ICollection<Tuple<ExpressionSyntax, ExpressionSyntax>> tableDefinition) : base(line, colomn)
+        public TableConstructorExpression(int line, int colomn, ICollection<(ExpressionSyntax, ExpressionSyntax)> tableDefinition) : base(line, colomn)
         {
             TableDefinition = tableDefinition;
         }

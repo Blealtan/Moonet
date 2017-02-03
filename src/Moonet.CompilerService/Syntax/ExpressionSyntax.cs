@@ -151,11 +151,11 @@ namespace Moonet.CompilerService.Syntax
     {
         public readonly ExpressionSyntax Function;
 
-        public readonly ICollection<ExpressionSyntax> Arguments;
+        public readonly IList<ExpressionSyntax> Arguments;
 
         public FunctionCallExpression(int line, int colomn,
             ExpressionSyntax function,
-            ICollection<ExpressionSyntax> arguments) : base(line, colomn)
+            IList<ExpressionSyntax> arguments) : base(line, colomn)
         {
             Function = function;
             Arguments = arguments;

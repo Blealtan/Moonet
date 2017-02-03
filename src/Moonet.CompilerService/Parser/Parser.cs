@@ -292,10 +292,50 @@ namespace Moonet.CompilerService.Parser
                             return ParseLocalFunctionRest();
                         }
                         else return ParseLocalDefinitionRest();
-                    default:
-                        // Assignment and function call.
-                        throw new NotImplementedException();
+                    case TokenType.Name:
+                    case TokenType.LeftParen:
+                        var start = ParsePrefixExpression();
+                        if (Type == TokenType.Assign || Type == TokenType.Comma)
+                            return ParseAssignment(start);
+                        if (start is FunctionCallExpression f)
+                            return new FunctionCallStatement(f.Line, f.Colomn, f);
+                        AddError("Illegal statement.");
+                        return null;
                 }
+        }
+
+        private AssignmentStatement ParseAssignment(ExpressionSyntax start)
+        {
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            var variables = new List<VariableExpression>();
+            while (Type == TokenType.Comma)
+            {
+                Next(); // Eat ','
+                if (start is VariableExpression v)
+                {
+                    variables.Add(v);
+                    start = ParsePrefixExpression();
+                }
+                else
+                    AddError("Expected variable in left hand of an assignment statement.");
+            }
+
+            if (Type != TokenType.Assign)
+            {
+                AddError("Expected '=' after the variable list of an assignment statement.");
+                return null;
+            }
+
+            var expressions = new List<ExpressionSyntax>();
+            do
+            {
+                Next(); // Eat '=' or ','
+                expressions.AddIfNonNull(ParseExpression());
+            } while (Type == TokenType.Comma);
+
+            return new AssignmentStatement(initLine, initColomn, variables, expressions);
         }
 
         private BreakStatement ParseBreak()
@@ -546,7 +586,64 @@ namespace Moonet.CompilerService.Parser
         #endregion
 
         #region Expression Parsing
-        private ExpressionSyntax ParseExpression()
+        private Dictionary<TokenType, BinaryOperator> _binops = new Dictionary<TokenType, BinaryOperator>()
+        {
+            { TokenType.Add, BinaryOperator.Add },
+            { TokenType.Minus, BinaryOperator.Minus },
+            { TokenType.Multiply, BinaryOperator.Multiply },
+            { TokenType.FloatDivide, BinaryOperator.FloatDivide },
+            { TokenType.FloorDivide, BinaryOperator.FloorDivide },
+            { TokenType.Exponent, BinaryOperator.Exponent },
+            { TokenType.Modulo, BinaryOperator.Modulo },
+            { TokenType.BitAnd, BinaryOperator.BitAnd },
+            { TokenType.BitXorOrNot, BinaryOperator.BitXor },
+            { TokenType.BitOr, BinaryOperator.BitOr },
+            { TokenType.BitRShift, BinaryOperator.BitRShift },
+            { TokenType.BitLShift, BinaryOperator.BitLShift },
+            { TokenType.Concat, BinaryOperator.Concat },
+            { TokenType.Less, BinaryOperator.Less },
+            { TokenType.LessEqual, BinaryOperator.LessEqual },
+            { TokenType.Greater, BinaryOperator.Greater },
+            { TokenType.GreaterEqual, BinaryOperator.GreaterEqual },
+            { TokenType.Equal, BinaryOperator.Equal },
+            { TokenType.Inequal, BinaryOperator.Inequal },
+            { TokenType.And, BinaryOperator.And },
+            { TokenType.Or, BinaryOperator.Or }
+        };
+
+        private Dictionary<TokenType, UnaryOperator> _unops = new Dictionary<TokenType, UnaryOperator>()
+        {
+            { TokenType.Minus, UnaryOperator.Negative },
+            { TokenType.Not, UnaryOperator.Not },
+            { TokenType.Length, UnaryOperator.Length },
+            { TokenType.BitXorOrNot, UnaryOperator.BitNot },
+        };
+
+        private ExpressionSyntax ParseExpression(int prec = -1)
+        {
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            var lhs = null as ExpressionSyntax;
+            if (_unops.ContainsKey(Type))
+            {
+                var op = _unops[Type];
+                Next();
+                lhs = new UnaryOperatorExpression(initLine, initColomn, op, ParseExpression(op.GetPrecedence()));
+            }
+            else lhs = ParseSimpleExpression();
+
+            while (_binops.ContainsKey(Type) && _binops[Type].GetPrecedence() > prec)
+            {
+                var op = _binops[Type];
+                Next();
+                lhs = new BinaryOperatorExpression(initLine, initColomn, op, lhs, ParseExpression(op.GetSubExprPrecedence()));
+            }
+
+            return lhs;
+        }
+
+        private ExpressionSyntax ParseSimpleExpression()
         {
             switch (Type)
             {
@@ -567,9 +664,80 @@ namespace Moonet.CompilerService.Parser
                 case TokenType.Function:
                     Next();
                     return ParseFunctionBody();
+                case TokenType.LeftBrace:
+                    return ParseTableConstructorExpression();
+                case TokenType.Name:
+                case TokenType.LeftParen:
+                    return ParsePrefixExpression();
                 default:
-                    throw new NotImplementedException();
+                    AddError("Unexpected expression start.");
+                    return null;
             }
+        }
+
+        private ExpressionSyntax ParsePrefixExpression()
+        {
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            var current = null as ExpressionSyntax;
+            switch (Type)
+            {
+                case TokenType.Name:
+                    current = new StandaloneVariableExpression(initLine, initColomn, StringValue);
+                    break;
+                case TokenType.LeftParen:
+                    Next();
+                    current = ParseExpression();
+                    break;
+                default:
+                    AddError("Unrecognized start of prefix expression.");
+                    return null;
+            }
+
+            while (true)
+            {
+                switch (Type)
+                {
+                    case TokenType.LeftSquareBracket:
+                        Next();
+                        current = new IndexedVariableExpression(initLine, initColomn, current, ParseExpression());
+                        if (Type != TokenType.RightSquareBracket) AddError("Square brackets not match.");
+                        else Next();
+                        continue;
+                    case TokenType.Dot:
+                        Next();
+                        if (Type != TokenType.Name) AddError("Expected member name after '.'.");
+                        else current = new FieldIndexedVariableExpression(initLine, initColomn, current, StringValue);
+                        Next();
+                        continue;
+                    case TokenType.LeftParen:
+                        var args = new List<ExpressionSyntax>();
+                        do
+                        {
+                            Next(); // Eat '(' or ','
+                            args.AddIfNonNull(ParseExpression());
+                        } while (Type == TokenType.Comma);
+                        if (Type != TokenType.RightParen) AddError("Parentheses not match.");
+                        current = new FunctionCallExpression(initLine, initColomn, current, args);
+                        continue;
+                    case TokenType.StringLiteral:
+                        current = new FunctionCallExpression(initLine, initColomn, current, new List<ExpressionSyntax>() {
+                            new LiteralExpressionSyntax<string>(_line, _colomn, LiteralType.String, StringValue)
+                        });
+                        continue;
+                    case TokenType.LeftBrace:
+                        current = new FunctionCallExpression(initLine, initColomn, current, new List<ExpressionSyntax>() {
+                            ParseTableConstructorExpression()
+                        });
+                        continue;
+                    case TokenType.Colon:
+                        continue;
+                }
+                break;
+            }
+
+            return current;
         }
 
         private FunctionDefinitionExpression ParseFunctionBody()
@@ -624,6 +792,11 @@ namespace Moonet.CompilerService.Parser
             else Next();
 
             return new FunctionDefinitionExpression(initLine, initColomn, parameters, hasVarArgs, body);
+        }
+
+        private TableConstructorExpression ParseTableConstructorExpression()
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }

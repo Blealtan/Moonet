@@ -46,7 +46,8 @@ namespace Moonet.CompilerService.Parser
 
         private void NextLine()
         {
-            CurrentLine = _input.ReadLine() + '\n';
+            CurrentLine = _input.ReadLine();
+            if (CurrentLine != null) CurrentLine += '\n';
             _colomn = 0;
             ++_line;
         }

@@ -548,7 +548,28 @@ namespace Moonet.CompilerService.Parser
         #region Expression Parsing
         private ExpressionSyntax ParseExpression()
         {
-            throw new NotImplementedException();
+            switch (Type)
+            {
+                case TokenType.Nil:
+                    return new LiteralExpressionSyntax(_line, _colomn, LiteralType.Nil);
+                case TokenType.True:
+                    return new LiteralExpressionSyntax<bool>(_line, _colomn, LiteralType.Boolean, true);
+                case TokenType.False:
+                    return new LiteralExpressionSyntax<bool>(_line, _colomn, LiteralType.Boolean, false);
+                case TokenType.IntegerLiteral:
+                    return new LiteralExpressionSyntax<int>(_line, _colomn, LiteralType.Integer, IntegerValue);
+                case TokenType.FloatLiteral:
+                    return new LiteralExpressionSyntax<double>(_line, _colomn, LiteralType.Float, FloatValue);
+                case TokenType.StringLiteral:
+                    return new LiteralExpressionSyntax<string>(_line, _colomn, LiteralType.String, StringValue);
+                case TokenType.VarArg:
+                    return new VarArgExpression(_line, _colomn);
+                case TokenType.Function:
+                    Next();
+                    return ParseFunctionBody();
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         private FunctionDefinitionExpression ParseFunctionBody()

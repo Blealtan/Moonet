@@ -10,11 +10,21 @@ namespace Moonet.CompilerService.Syntax
         }
     }
 
-    public class LiteralExpressionSyntax<T> : ExpressionSyntax
+    public class LiteralExpressionSyntax : ExpressionSyntax
+    {
+        public readonly LiteralType Type;
+
+        public LiteralExpressionSyntax(int line, int colomn, LiteralType type) : base(line, colomn)
+        {
+            Type = type;
+        }
+    }
+
+    public class LiteralExpressionSyntax<T> : LiteralExpressionSyntax
     {
         public readonly T Value;
 
-        public LiteralExpressionSyntax(int line, int colomn, T value) : base(line, colomn)
+        public LiteralExpressionSyntax(int line, int colomn, LiteralType type, T value) : base(line, colomn, type)
         {
             Value = value;
         }

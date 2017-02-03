@@ -216,6 +216,9 @@ namespace Moonet.CompilerService.Parser
                                 break;
                         }
                         break;
+                    case TokenType.Semicolon:
+                    case TokenType.Comma:
+                        break;
                     default:
                         AddError("Member should start with either name (for fields) or 'function' (for member functions).");
                         break;
@@ -500,12 +503,63 @@ namespace Moonet.CompilerService.Parser
 
         private LocalDefinitionStatement ParseLocalDefinitionRest()
         {
-            throw new NotImplementedException();
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            var variables = new List<(string, string)>();
+            do
+            {
+                Next(); // Eat ','
+
+                if (Type != TokenType.Name)
+                {
+                    AddError("Variable name expected.");
+                    return null;
+                }
+                var name = StringValue;
+                Next();
+
+                var type = null as string;
+                if (Type == TokenType.Colon)
+                {
+                    Next();
+                    if (Type != TokenType.Name)
+                    {
+                        AddError("Type name expected.");
+                        return null;
+                    }
+                    type = StringValue;
+                    Next();
+                }
+
+                variables.Add((name, type));
+            } while (Type == TokenType.Comma);
+
+            var expressions = new List<ExpressionSyntax>();
+
+            if (Type == TokenType.Assign)
+                do
+                {
+                    Next(); // Eat '=' or ','
+                    expressions.AddIfNonNull(ParseExpression());
+                } while (Type == TokenType.Comma);
+
+            return new LocalDefinitionStatement(initLine, initColomn, variables, expressions);
         }
 
         private LocalFunctionDefinitionStatement ParseLocalFunctionRest()
         {
-            throw new NotImplementedException();
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            if (Type != TokenType.Name)
+            {
+                AddError("Function name expected.");
+                return null;
+            }
+            var name = StringValue;
+            Next();
+            return new LocalFunctionDefinitionStatement(initLine, initColomn, name, ParseFunctionBody());
         }
 
         private FunctionDefinitionStatement ParseNamedFunctionDef()
@@ -796,7 +850,53 @@ namespace Moonet.CompilerService.Parser
 
         private TableConstructorExpression ParseTableConstructorExpression()
         {
-            throw new NotImplementedException();
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            Next(); // Eat '{'
+
+            var table = new List<(ExpressionSyntax, ExpressionSyntax)>();
+            int count = 1;
+            while (true)
+            {
+                var key = null as ExpressionSyntax;
+                switch (Type)
+                {
+                    case TokenType.LeftSquareBracket:
+                        Next();
+                        key = ParseExpression();
+                        if (Type != TokenType.RightSquareBracket) AddError("Square brackets not match.");
+                        else Next();
+                        if (Type != TokenType.Assign) AddError("'=' expected after key in table constructor.");
+                        else Next();
+                        break;
+                    case TokenType.Name:
+                        key = new LiteralExpressionSyntax<string>(_line, _colomn, LiteralType.String, StringValue);
+                        if (Type != TokenType.Assign) AddError("'=' expected after key in table constructor.");
+                        else Next();
+                        break;
+                    default:
+                        key = new LiteralExpressionSyntax<int>(_line, _colomn, LiteralType.Integer, count++);
+                        break;
+                }
+
+                var value = ParseExpression();
+
+                table.Add((key, value));
+
+                switch (Type)
+                {
+                    case TokenType.Comma:
+                    case TokenType.Semicolon:
+                        continue;
+                    case TokenType.RightBrace:
+                        break;
+                    default:
+                        AddError("Unexpected token.");
+                        return null;
+                }
+                break;
+            }
         }
         #endregion
     }

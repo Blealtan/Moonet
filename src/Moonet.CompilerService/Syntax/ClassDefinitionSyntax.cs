@@ -8,7 +8,7 @@ namespace Moonet.CompilerService.Syntax
 
         public readonly ICollection<string> BaseNames;
 
-        public readonly ICollection<LocalDefinitionStatement> Fields;
+        public readonly IDictionary<string, (string, ExpressionSyntax)> Fields;
 
         public readonly IDictionary<string, FunctionDefinitionExpression> Members;
 
@@ -17,7 +17,7 @@ namespace Moonet.CompilerService.Syntax
         public ClassDefinitionSyntax(int line, int colomn,
             string name,
             ICollection<string> baseNames,
-            ICollection<LocalDefinitionStatement> fields,
+            IDictionary<string, (string, ExpressionSyntax)> fields,
             IDictionary<string, FunctionDefinitionExpression> members,
             IDictionary<string, FunctionDefinitionExpression> staticMembers) : base(line, colomn)
         {

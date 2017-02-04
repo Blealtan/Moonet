@@ -171,15 +171,33 @@ namespace Moonet.CompilerService.Parser
             }
 
             // Process members
-            var fields = new List<LocalDefinitionStatement>();
+            var fields = new Dictionary<string, (string, ExpressionSyntax)>();
             var members = new Dictionary<string, FunctionDefinitionExpression>();
             var staticMembers = new Dictionary<string, FunctionDefinitionExpression>();
-            while (Type != TokenType.End)
+            while (true)
             {
                 switch (Type)
                 {
                     case TokenType.Name:
-                        fields.AddIfNonNull(ParseLocalDefinitionRest());
+                        var fieldName = StringValue;
+                        var fieldType = null as string;
+                        var fieldInit = null as ExpressionSyntax;
+                        Next();
+                        if (Type == TokenType.Colon)
+                        {
+                            Next();
+                            if (Type != TokenType.Name) AddError("Field name expected.");
+                            else
+                            {
+                                fieldType = StringValue;
+                                Next();
+                            }
+                        }
+                        if (Type == TokenType.Assign)
+                        {
+                            Next();
+                            fieldInit = ParseExpression();
+                        }
                         break;
                     case TokenType.Function:
                         Next();
@@ -216,13 +234,22 @@ namespace Moonet.CompilerService.Parser
                                 break;
                         }
                         break;
-                    case TokenType.Semicolon:
-                    case TokenType.Comma:
-                        break;
                     default:
                         AddError("Member should start with either name (for fields) or 'function' (for member functions).");
                         break;
                 }
+                switch (Type)
+                {
+                    case TokenType.Semicolon:
+                    case TokenType.Comma:
+                        continue;
+                    case TokenType.End:
+                        break;
+                    default:
+                        AddError("';' or ',' expected between class members.");
+                        continue;
+                }
+                break;
             }
 
             Next(); // Eat 'end'

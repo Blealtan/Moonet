@@ -897,6 +897,8 @@ namespace Moonet.CompilerService.Parser
                 }
                 break;
             }
+
+            return new TableConstructorExpression(initLine, initColomn, table);
         }
         #endregion
     }

@@ -608,13 +608,30 @@ namespace Moonet.CompilerService.Parser
                         break;
                     case 'u':
                         int u;
-                        if (!int.TryParse(CurrentLine.Substring(slashPos + 2, 3), out u))
+                        if (CurrentLine[slashPos + 2] != '{')
                         {
-                            AddError(@"Expected two hexadecimal digits for '\u' escape sequence.");
+                            AddError(@"Expected '{' first for '\u' escape sequence.");
                             u = 'u';
                             _colomn = slashPos + 2;
                         }
-                        else _colomn = slashPos + 4;
+                        else
+                        {
+                            _colomn = CurrentLine.IndexOf('}', slashPos + 3);
+                            if (_colomn == -1)
+                            {
+                                AddError(@"Braces for '\u' escape sequence not closed.");
+                                u = 'u';
+                                _colomn = slashPos + 2;
+                            }
+                            else if (!int.TryParse(CurrentLine.Substring(slashPos + 3, _colomn - slashPos - 3),
+                                                   NumberStyles.HexNumber, CultureInfo.InvariantCulture, out u))
+                            {
+                                AddError(@"Expected hexadecimal digits between braces after '\u' escape sequence.");
+                                u = 'u';
+                                _colomn = slashPos + 2;
+                            }
+                            else _colomn++;
+                        }
                         sb.Append((char)u);
                         break;
                     case '\n':

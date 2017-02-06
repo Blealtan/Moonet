@@ -79,14 +79,14 @@ namespace Moonet.CompilerService.Syntax
 
     public class FunctionDefinitionExpression : ExpressionSyntax
     {
-        public readonly (string, string)[] Parameters;
+        public readonly (string name, string type)[] Parameters;
 
         public readonly bool HasVarArgs;
 
         public readonly BlockSyntax Body;
 
         public FunctionDefinitionExpression(int line, int colomn,
-            (string, string)[] parameters,
+            (string name, string type)[] parameters,
             bool hasVarArgs,
             BlockSyntax body) : base(line, colomn)
         {
@@ -98,9 +98,9 @@ namespace Moonet.CompilerService.Syntax
 
     public class TableConstructorExpression : ExpressionSyntax
     {
-        public readonly (ExpressionSyntax, ExpressionSyntax)[] TableDefinition;
+        public readonly (ExpressionSyntax key, ExpressionSyntax value)[] TableDefinition;
 
-        public TableConstructorExpression(int line, int colomn, (ExpressionSyntax, ExpressionSyntax)[] tableDefinition) : base(line, colomn)
+        public TableConstructorExpression(int line, int colomn, (ExpressionSyntax key, ExpressionSyntax value)[] tableDefinition) : base(line, colomn)
         {
             TableDefinition = tableDefinition;
         }

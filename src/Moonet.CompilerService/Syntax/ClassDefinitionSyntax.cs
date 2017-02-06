@@ -8,11 +8,11 @@ namespace Moonet.CompilerService.Syntax
 
         public readonly string[] BaseNames;
 
-        public readonly (string, string, ExpressionSyntax)[] Fields;
+        public readonly (string name, string type, ExpressionSyntax init)[] Fields;
 
-        public readonly (string, FunctionDefinitionExpression)[] Members;
+        public readonly (string name, FunctionDefinitionExpression func)[] Members;
 
-        public readonly (string, FunctionDefinitionExpression)[] StaticMembers;
+        public readonly (string name, FunctionDefinitionExpression func)[] StaticMembers;
 
         public ClassDefinitionSyntax(int line, int colomn,
             string name,

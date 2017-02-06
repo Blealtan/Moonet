@@ -12,13 +12,13 @@ namespace Moonet.CompilerService.Syntax
 
     public class AssignmentStatement : StatementSyntax
     {
-        public readonly ICollection<VariableExpression> Variables;
+        public readonly VariableExpression[] Variables;
 
-        public readonly ICollection<ExpressionSyntax> Expressions;
+        public readonly ExpressionSyntax[] Expressions;
 
         public AssignmentStatement(int line, int colomn,
-            ICollection<VariableExpression> variables,
-            ICollection<ExpressionSyntax> expressions) : base(line, colomn)
+            VariableExpression[] variables,
+            ExpressionSyntax[] expressions) : base(line, colomn)
         {
             Variables = variables;
             Expressions = expressions;
@@ -100,14 +100,14 @@ namespace Moonet.CompilerService.Syntax
 
     public class IfStatement : StatementSyntax
     {
-        public readonly IList<(ExpressionSyntax, BlockSyntax)> Conditions;
+        public readonly (ExpressionSyntax, BlockSyntax)[] Conditions;
 
         /// <summary>
         /// Null for no else presented.
         /// </summary>
         public readonly BlockSyntax ElseBody;
 
-        public IfStatement(int line, int colomn, IList<(ExpressionSyntax, BlockSyntax)> conditions, BlockSyntax elseBody = null) : base(line, colomn)
+        public IfStatement(int line, int colomn, (ExpressionSyntax, BlockSyntax)[] conditions, BlockSyntax elseBody = null) : base(line, colomn)
         {
             Conditions = conditions;
             ElseBody = elseBody;
@@ -146,13 +146,13 @@ namespace Moonet.CompilerService.Syntax
 
     public class ForIteratorStatement : ForStatement
     {
-        public readonly IList<string> Names;
+        public readonly string[] Names;
 
-        public readonly IList<ExpressionSyntax> Iterator;
+        public readonly ExpressionSyntax[] Iterator;
 
         public ForIteratorStatement(int line, int colomn,
-            IList<string> names,
-            IList<ExpressionSyntax> iterator) : base(line, colomn)
+            string[] names,
+            ExpressionSyntax[] iterator) : base(line, colomn)
         {
             Names = names;
             Iterator = iterator;
@@ -164,7 +164,7 @@ namespace Moonet.CompilerService.Syntax
         /// <summary>
         /// Should add at least one element to this list.
         /// </summary>
-        public readonly IList<string> ReferenceChain;
+        public readonly string[] ReferenceChain;
 
         /// <summary>
         /// Null for no member reference presented.
@@ -174,7 +174,7 @@ namespace Moonet.CompilerService.Syntax
         public readonly FunctionDefinitionExpression Function;
 
         public FunctionDefinitionStatement(int line, int colomn,
-            IList<string> referenceChain,
+            string[] referenceChain,
             string memberName,
             FunctionDefinitionExpression function) : base(line, colomn)
         {
@@ -201,13 +201,13 @@ namespace Moonet.CompilerService.Syntax
 
     public class LocalDefinitionStatement : StatementSyntax
     {
-        public readonly IList<(string, string)> Variables;
+        public readonly (string, string)[] Variables;
 
-        public readonly IList<ExpressionSyntax> InitExpressions;
+        public readonly ExpressionSyntax[] InitExpressions;
 
         public LocalDefinitionStatement(int line, int colomn,
-            IList<(string, string)> variables,
-            IList<ExpressionSyntax> initExpressions) : base(line, colomn)
+            (string, string)[] variables,
+            ExpressionSyntax[] initExpressions) : base(line, colomn)
         {
             Variables = variables;
             InitExpressions = initExpressions;

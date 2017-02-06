@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Moonet.CompilerService.Parser
 {
-    internal class Token : IEquatable<Token>
+    internal class Token
     {
         public TokenType Type { get; }
 
@@ -13,7 +13,7 @@ namespace Moonet.CompilerService.Parser
             Type = type;
         }
 
-        public virtual bool Equals(Token other) => Type == other.Type;
+        public override string ToString() => Type.ToString();
     }
 
     internal class Token<TValue> : Token
@@ -25,12 +25,9 @@ namespace Moonet.CompilerService.Parser
             Value = value;
         }
 
-        public override bool Equals(Token other)
-            => other is Token<TValue> t
-            && base.Equals(other)
-            && EqualityComparer<TValue>.Default.Equals(Value, t.Value);
+        public override string ToString() => Type.ToString() + ":" + Value.ToString();
     }
-
+    
     internal enum TokenType
     {
         Name, // Identifiers

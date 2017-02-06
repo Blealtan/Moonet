@@ -1,7 +1,7 @@
 ﻿using System.IO;
-using Moonet.CompilerService.Parser;
 using Moonet.CompilerTest.Utilities;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Moonet.CompilerTest.Parser.Lexer
 {
@@ -10,55 +10,6 @@ namespace Moonet.CompilerTest.Parser.Lexer
         [Fact]
         public void TokenStreamTest1()
         {
-            Token[] tokens =
-            {
-                new Token(TokenType.Local),
-                new Token(TokenType.Function),
-                new Token<string>(TokenType.Name, "checkArgumentType"),
-                new Token(TokenType.LeftParen),
-                new Token<string>(TokenType.Name, "expected"),
-                new Token(TokenType.Comma),
-                new Token<string>(TokenType.Name, "actual"),
-                new Token(TokenType.Comma),
-                new Token<string>(TokenType.Name, "fn"),
-                new Token(TokenType.Comma),
-                new Token<string>(TokenType.Name, "ud"),
-                new Token(TokenType.Comma),
-                new Token<string>(TokenType.Name, "level"),
-                new Token(TokenType.RightParen),
-                new Token(TokenType.Local),
-                new Token<string>(TokenType.Name, "level"),
-                new Token(TokenType.Assign),
-                new Token<string>(TokenType.Name, "level"),
-                new Token(TokenType.Or),
-                new Token<int>(TokenType.IntegerLiteral, 3),
-                new Token(TokenType.If),
-                new Token<string>(TokenType.Name, "expected"),
-                new Token(TokenType.Inequal),
-                new Token<string>(TokenType.Name, "actual"),
-                new Token(TokenType.Then),
-                new Token<string>(TokenType.Name, "checkArgument"),
-                new Token(TokenType.LeftParen),
-                new Token(TokenType.False),
-                new Token(TokenType.Comma),
-                new Token<string>(TokenType.Name, "fn"),
-                new Token(TokenType.Comma),
-                new Token<string>(TokenType.Name, "ud"),
-                new Token(TokenType.Comma),
-                new Token<string>(TokenType.Name, "expected"),
-                new Token(TokenType.Concat),
-                new Token<string>(TokenType.StringLiteral, " expected, got "),
-                new Token(TokenType.Concat),
-                new Token<string>(TokenType.Name, "actual"),
-                new Token(TokenType.Comma),
-                new Token<string>(TokenType.Name, "level"),
-                new Token(TokenType.Add),
-                new Token<int>(TokenType.IntegerLiteral, 1),
-                new Token(TokenType.RightParen),
-                new Token(TokenType.End),
-                new Token(TokenType.End),
-                new Token(TokenType.EndOfFile)
-            };
             string source =
 @"local function checkArgumentType(expected, actual, fn, ud, level)
    local level = level or 3
@@ -66,7 +17,58 @@ namespace Moonet.CompilerTest.Parser.Lexer
       checkArgument(false, fn, ud, expected .. "" expected, got "" .. actual, level + 1)
    end
 end";
-            LexerTest.TestTokenStream(new StringReader(source), tokens);
+            var expectedTokens = new List<string>()
+            {
+                "Local",
+                "Function",
+                "Name:checkArgumentType",
+                "LeftParen",
+                "Name:expected",
+                "Comma",
+                "Name:actual",
+                "Comma",
+                "Name:fn",
+                "Comma",
+                "Name:ud",
+                "Comma",
+                "Name:level",
+                "RightParen",
+                "Local",
+                "Name:level",
+                "Assign",
+                "Name:level",
+                "Or",
+                "IntegerLiteral:3",
+                "If",
+                "Name:expected",
+                "Inequal",
+                "Name:actual",
+                "Then",
+                "Name:checkArgument",
+                "LeftParen",
+                "False",
+                "Comma",
+                "Name:fn",
+                "Comma",
+                "Name:ud",
+                "Comma",
+                "Name:expected",
+                "Concat",
+                "StringLiteral: expected, got ",
+                "Concat",
+                "Name:actual",
+                "Comma",
+                "Name:level",
+                "Add",
+                "IntegerLiteral:1",
+                "RightParen",
+                "End",
+                "End",
+                "EndOfFile"
+            };
+            (var tokens, var errors) = LexerTest.SerializeTokenStream(new StringReader(source));
+            Assert.Equal(expectedTokens as IEnumerable<string>, tokens);
+            Assert.Equal(errors.Count, 0);
         }
     }
 }

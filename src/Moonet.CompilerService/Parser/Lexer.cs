@@ -90,6 +90,8 @@ namespace Moonet.CompilerService.Parser
             { TokenType.EndOfFile, new Token(TokenType.EndOfFile) }
         };
 
+        public bool EndReached { get; private set; } = false;
+
         /// <summary>
         /// Analyze next token from provided reader.
         /// </summary>
@@ -338,6 +340,7 @@ namespace Moonet.CompilerService.Parser
                         break;
                     case -1:
                         result = _basicTokenMap[TokenType.EndOfFile];
+                        EndReached = true;
                         break;
                     default:
                         NextChar();

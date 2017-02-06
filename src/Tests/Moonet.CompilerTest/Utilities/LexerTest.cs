@@ -6,9 +6,9 @@ using Xunit;
 
 namespace Moonet.CompilerTest.Utilities
 {
-    internal class LexerTest
+    internal static class LexerTest
     {
-        public void TestTokenStream(TextReader input, IEnumerable<Token> tokens)
+        public static void TestTokenStream(TextReader input, IEnumerable<Token> tokens)
         {
             var errors = new Queue<Error>();
             var lexer = new Lexer(input, errors);

@@ -1,8 +1,6 @@
 ﻿using Moonet.CompilerService.Syntax;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Moonet.CompilerService.Parser
 {
@@ -120,6 +118,7 @@ namespace Moonet.CompilerService.Parser
 
             var statements = new List<StatementSyntax>();
             var classes = new List<ClassDefinitionSyntax>();
+            var @return = null as ReturnSyntax;
 
             while (Type != TokenType.EndOfFile)
             {
@@ -127,6 +126,11 @@ namespace Moonet.CompilerService.Parser
                     classes.AddIfNonNull(ParseClass());
                 else if (_statementFirst.Contains(Type))
                     statements.AddIfNonNull(ParseStatement());
+                else if (Type == TokenType.Return)
+                {
+                    @return = ParseReturn();
+                    break;
+                }
                 else
                 {
                     AddError("Unrecognized token.");
@@ -134,7 +138,10 @@ namespace Moonet.CompilerService.Parser
                 }
             }
 
-            return (new BlockSyntax(initLine, initColomn, statements.ToArray()), classes.ToArray());
+            if (Type != TokenType.EndOfFile)
+                AddError("Return in root block should occur only right before end of file.");
+
+            return (new BlockSyntax(initLine, initColomn, statements.ToArray(), @return), classes.ToArray());
         }
 
         private ClassDefinitionSyntax ParseClass()
@@ -268,7 +275,26 @@ namespace Moonet.CompilerService.Parser
             while (_statementFirst.Contains(Type))
                 statements.AddIfNonNull(ParseStatement());
 
-            return new BlockSyntax(initLine, initColomn, statements.ToArray());
+            var @return = null as ReturnSyntax;
+            if (Type == TokenType.Return)
+                @return = ParseReturn();
+
+            return new BlockSyntax(initLine, initColomn, statements.ToArray(), @return);
+        }
+
+        private ReturnSyntax ParseReturn()
+        {
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            var expressions = new List<ExpressionSyntax>();
+            do
+            {
+                Next(); // Eat 'return' or ','
+                expressions.AddIfNonNull(ParseExpression());
+            } while (Type == TokenType.Comma);
+
+            return new ReturnSyntax(initLine, initColomn, expressions.ToArray());
         }
 
         #region Statement Parsing

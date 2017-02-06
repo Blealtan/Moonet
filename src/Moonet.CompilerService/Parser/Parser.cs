@@ -68,7 +68,7 @@ namespace Moonet.CompilerService.Parser
             return new SyntaxTree(usings, body, classes);
         }
 
-        private ICollection<UsingSyntax> ParseUsing()
+        private UsingSyntax[] ParseUsing()
         {
             var usings = new List<UsingSyntax>();
             while (Type == TokenType.Using)
@@ -110,10 +110,10 @@ namespace Moonet.CompilerService.Parser
                         continue;
                 }
             }
-            return usings;
+            return usings.ToArray();
         }
 
-        private (BlockSyntax body, ICollection<ClassDefinitionSyntax> classes) ParseBody()
+        private (BlockSyntax body, ClassDefinitionSyntax[] classes) ParseBody()
         {
             var initLine = _line;
             var initColomn = _colomn;
@@ -134,7 +134,7 @@ namespace Moonet.CompilerService.Parser
                 }
             }
 
-            return (new BlockSyntax(initLine, initColomn, statements), classes);
+            return (new BlockSyntax(initLine, initColomn, statements.ToArray()), classes.ToArray());
         }
 
         private ClassDefinitionSyntax ParseClass()
@@ -171,9 +171,9 @@ namespace Moonet.CompilerService.Parser
             }
 
             // Process members
-            var fields = new Dictionary<string, (string, ExpressionSyntax)>();
-            var members = new Dictionary<string, FunctionDefinitionExpression>();
-            var staticMembers = new Dictionary<string, FunctionDefinitionExpression>();
+            var fields = new List<(string, string, ExpressionSyntax)>();
+            var members = new List<(string, FunctionDefinitionExpression)>();
+            var staticMembers = new List<(string, FunctionDefinitionExpression)>();
             while (true)
             {
                 switch (Type)
@@ -198,6 +198,7 @@ namespace Moonet.CompilerService.Parser
                             Next();
                             fieldInit = ParseExpression();
                         }
+                        fields.Add((fieldName, fieldType, fieldInit));
                         break;
                     case TokenType.Function:
                         Next();
@@ -213,7 +214,7 @@ namespace Moonet.CompilerService.Parser
                                 var member = StringValue;
                                 Next();
                                 var body = ParseFunctionBody();
-                                if (body != null) members.Add(member, body);
+                                if (body != null) members.Add((member, body));
                                 break;
                             case TokenType.Dot:
                                 Next();
@@ -225,12 +226,12 @@ namespace Moonet.CompilerService.Parser
                                 var staticMember = StringValue;
                                 Next();
                                 var staticBody = ParseFunctionBody();
-                                if (staticBody != null) staticMembers.Add(staticMember, staticBody);
+                                if (staticBody != null) staticMembers.Add((staticMember, staticBody));
                                 break;
                             default:
                                 AddError("Member function should start with ':' or '.' to specify if it's static; assuming it's a non-static member.");
                                 var f = ParseLocalFunctionRest();
-                                if (f != null) members.Add(f.Name, f.Function);
+                                if (f != null) members.Add((f.Name, f.Function));
                                 break;
                         }
                         break;
@@ -254,7 +255,7 @@ namespace Moonet.CompilerService.Parser
 
             Next(); // Eat 'end'
 
-            return new ClassDefinitionSyntax(initLine, initColomn, name, bases, fields, members, staticMembers);
+            return new ClassDefinitionSyntax(initLine, initColomn, name, bases.ToArray(), fields.ToArray(), members.ToArray(), staticMembers.ToArray());
         }
 
         private BlockSyntax ParseBlock()
@@ -267,7 +268,7 @@ namespace Moonet.CompilerService.Parser
             while (_statementFirst.Contains(Type))
                 statements.AddIfNonNull(ParseStatement());
 
-            return new BlockSyntax(initLine, initColomn, statements);
+            return new BlockSyntax(initLine, initColomn, statements.ToArray());
         }
 
         #region Statement Parsing
@@ -365,7 +366,7 @@ namespace Moonet.CompilerService.Parser
                 expressions.AddIfNonNull(ParseExpression());
             } while (Type == TokenType.Comma);
 
-            return new AssignmentStatement(initLine, initColomn, variables, expressions);
+            return new AssignmentStatement(initLine, initColomn, variables.ToArray(), expressions.ToArray());
         }
 
         private BreakStatement ParseBreak()
@@ -450,7 +451,7 @@ namespace Moonet.CompilerService.Parser
                     AddError("Illegal for by iterator loop.");
                     return null;
                 }
-                return new ForIteratorStatement(initLine, initColomn, names, iterator);
+                return new ForIteratorStatement(initLine, initColomn, names.ToArray(), iterator.ToArray());
             }
             else
             {
@@ -503,7 +504,7 @@ namespace Moonet.CompilerService.Parser
             if (Type != TokenType.End)
                 AddError("Expected 'end' after if statement.");
 
-            return new IfStatement(initLine, initColomn, conditions, elseBody);
+            return new IfStatement(initLine, initColomn, conditions.ToArray(), elseBody);
         }
 
         private LabelStatement ParseLabel()
@@ -571,7 +572,7 @@ namespace Moonet.CompilerService.Parser
                     expressions.AddIfNonNull(ParseExpression());
                 } while (Type == TokenType.Comma);
 
-            return new LocalDefinitionStatement(initLine, initColomn, variables, expressions);
+            return new LocalDefinitionStatement(initLine, initColomn, variables.ToArray(), expressions.ToArray());
         }
 
         private LocalFunctionDefinitionStatement ParseLocalFunctionRest()
@@ -622,7 +623,7 @@ namespace Moonet.CompilerService.Parser
 
             var function = ParseFunctionBody();
 
-            return new FunctionDefinitionStatement(initLine, initColomn, referenceChain, memberName, function);
+            return new FunctionDefinitionStatement(initLine, initColomn, referenceChain.ToArray(), memberName, function);
         }
 
         private RepeatLoopStatement ParseRepeat()
@@ -800,15 +801,15 @@ namespace Moonet.CompilerService.Parser
                             args.AddIfNonNull(ParseExpression());
                         } while (Type == TokenType.Comma);
                         if (Type != TokenType.RightParen) AddError("Parentheses not match.");
-                        current = new FunctionCallExpression(initLine, initColomn, current, args);
+                        current = new FunctionCallExpression(initLine, initColomn, current, args.ToArray());
                         continue;
                     case TokenType.StringLiteral:
-                        current = new FunctionCallExpression(initLine, initColomn, current, new List<ExpressionSyntax>() {
+                        current = new FunctionCallExpression(initLine, initColomn, current, new ExpressionSyntax[] {
                             new LiteralExpressionSyntax<string>(_line, _colomn, LiteralType.String, StringValue)
                         });
                         continue;
                     case TokenType.LeftBrace:
-                        current = new FunctionCallExpression(initLine, initColomn, current, new List<ExpressionSyntax>() {
+                        current = new FunctionCallExpression(initLine, initColomn, current, new ExpressionSyntax[] {
                             ParseTableConstructorExpression()
                         });
                         continue;
@@ -872,7 +873,7 @@ namespace Moonet.CompilerService.Parser
             if (Type != TokenType.End) AddError("Expected 'end' at end of while loop; assuming you forgot to write it.");
             else Next();
 
-            return new FunctionDefinitionExpression(initLine, initColomn, parameters, hasVarArgs, body);
+            return new FunctionDefinitionExpression(initLine, initColomn, parameters.ToArray(), hasVarArgs, body);
         }
 
         private TableConstructorExpression ParseTableConstructorExpression()
@@ -925,7 +926,7 @@ namespace Moonet.CompilerService.Parser
                 break;
             }
 
-            return new TableConstructorExpression(initLine, initColomn, table);
+            return new TableConstructorExpression(initLine, initColomn, table.ToArray());
         }
         #endregion
     }

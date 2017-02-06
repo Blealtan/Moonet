@@ -12,14 +12,14 @@ namespace Moonet.CompilerService.Syntax
 
         public readonly (string, FunctionDefinitionExpression)[] Members;
 
-        public readonly (string, FunctionDefinitionExpression>)[] StaticMembers;
+        public readonly (string, FunctionDefinitionExpression)[] StaticMembers;
 
         public ClassDefinitionSyntax(int line, int colomn,
             string name,
             string[] baseNames,
-            (string, string, ExpressionSyntax)[] fields,
-            (string, FunctionDefinitionExpression>)[] members,
-            (string, FunctionDefinitionExpression>)[] staticMembers) : base(line, colomn)
+            (string name, string type, ExpressionSyntax init)[] fields,
+            (string name, FunctionDefinitionExpression func)[] members,
+            (string name, FunctionDefinitionExpression func)[] staticMembers) : base(line, colomn)
         {
             Name = name;
             BaseNames = baseNames;

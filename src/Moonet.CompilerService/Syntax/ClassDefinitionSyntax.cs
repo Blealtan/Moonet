@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Moonet.CompilerService.Syntax
+﻿namespace Moonet.CompilerService.Syntax
 {
     public class ClassDefinitionSyntax : SyntaxNode
     {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Moonet.CompilerService.Syntax
+﻿namespace Moonet.CompilerService.Syntax
 {
     public abstract class SyntaxNode
     {

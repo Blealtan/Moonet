@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Moonet.CompilerService.Syntax
+﻿namespace Moonet.CompilerService.Syntax
 {
     public abstract class ExpressionSyntax : SyntaxNode
     {

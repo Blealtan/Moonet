@@ -15,7 +15,7 @@ namespace Moonet.CompilerService.Parser
         {
             _input = input;
             _errors = errors;
-            CurrentLine = _input.ReadLine();
+            NextLine();
         }
 
         private void AddError(string message)
@@ -554,7 +554,7 @@ namespace Moonet.CompilerService.Parser
             var closePos = CurrentLine.IndexOf(quote, _colomn);
             if (closePos == -1) closePos = CurrentLine.Length;
             int slashPos;
-            while ((slashPos = CurrentLine.IndexOf(quote, _colomn)) < closePos)
+            while ((slashPos = CurrentLine.IndexOf('\\', _colomn)) < closePos)
             {
                 if (slashPos == -1) break;
                 sb.Append(CurrentLine.Substring(_colomn, slashPos - _colomn));
@@ -588,13 +588,14 @@ namespace Moonet.CompilerService.Parser
                     case '8':
                     case '9':
                         char n = (char)0;
-                        for (int i = 1; i < 4; i++)
+                        int i;
+                        for (i = 1; i < 4; i++)
                         {
                             if (CurrentLine[slashPos + i] >= '0' && CurrentLine[slashPos + i] <= '9')
-                                break;
-                            else
                                 n = (char)(n * 10 + CurrentLine[slashPos + i] - '0');
+                            else break;
                         }
+                        _colomn = slashPos + i;
                         sb.Append(n);
                         break;
                     // Hexadecimal.
@@ -643,6 +644,17 @@ namespace Moonet.CompilerService.Parser
                         if (closePos == -1) closePos = CurrentLine.Length;
                         sb.Append('\n');
                         break;
+                    case 'z':
+                        _colomn = slashPos + 1;
+                        int z;
+                        do
+                        {
+                            NextChar();
+                            z = Peek();
+                        } while (z == ' ' || z == '\t' || z == '\n');
+                        closePos = CurrentLine.IndexOf(quote, _colomn);
+                        if (closePos == -1) closePos = CurrentLine.Length;
+                        break;
                     default:
                         AddError("Unrecognized escape sequence.");
                         _colomn = slashPos + 2;
@@ -676,7 +688,7 @@ namespace Moonet.CompilerService.Parser
                 if (i < firstLine.Length && firstLine[i] == '[')
                     match = i;
             }
-            _colomn = CurrentLine.Length;
+            _colomn = CurrentLine.Length - 1;
             if (match >= 0) LongBracketBody(match);
         }
     }

@@ -17,7 +17,7 @@ namespace Moonet.CompilerTest.Parser.Lexer
       checkArgument(false, fn, ud, expected .. "" expected, got "" .. actual, level + 1)
    end
 end";
-            var expectedTokens = new List<string>()
+            IEnumerable<string> expectedTokens = new List<string>()
             {
                 "Local",
                 "Function",
@@ -67,7 +67,63 @@ end";
                 "EndOfFile"
             };
             (var tokens, var errors) = LexerTest.SerializeTokenStream(new StringReader(source));
-            Assert.Equal(expectedTokens as IEnumerable<string>, tokens);
+            Assert.Equal(expectedTokens, tokens);
+            Assert.Equal(errors.Count, 0);
+        }
+
+        [Fact]
+        public void TokenStreamTest2()
+        {
+            string source =
+@"-- Test comment
+local a = [[
+blabla
+\\aaa]]
+local b = [==[]=]
+]=]]==]
+--[[
+Test block comment]]
+--[=[]===]=]";
+            IEnumerable<string> expectedTokens = new List<string>()
+            {
+                "Local",
+                "Name:a",
+                "Assign",
+                "StringLiteral:blabla\n\\\\aaa",
+                "Local",
+                "Name:b",
+                "Assign",
+                "StringLiteral:]=]\n]=]",
+                "EndOfFile"
+            };
+            (var tokens, var errors) = LexerTest.SerializeTokenStream(new StringReader(source));
+            Assert.Equal(expectedTokens, tokens);
+            Assert.Equal(errors.Count, 0);
+        }
+
+        [Fact]
+        public void TokenStreamTest3()
+        {
+            string source =
+@"          local escapedString = '\z
+            Something? Something.\n\z
+            Well, another problem.\
+\u{4e2d}\u{6587}\u{6d4b}\u{8bd5}\u{3002}\n\z
+            \97lo\10\04923'";
+            IEnumerable<string> expectedTokens = new List<string>()
+            {
+                "Local",
+                "Name:escapedString",
+                "Assign",
+                "StringLiteral:" +
+                "Something? Something.\n" +
+                "Well, another problem.\n" +
+                "中文测试。\n" +
+                "alo\n123",
+                "EndOfFile"
+            };
+            (var tokens, var errors) = LexerTest.SerializeTokenStream(new StringReader(source));
+            Assert.Equal(expectedTokens, tokens);
             Assert.Equal(errors.Count, 0);
         }
     }

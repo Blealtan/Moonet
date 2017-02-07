@@ -4,11 +4,10 @@ using System.Collections.Generic;
 
 namespace Moonet.CompilerService.Semantic
 {
-    public class SemanticTree
+    public class Block : SemanticNode
     {
-        public SemanticTree(SyntaxTree syntaxTree, Queue<Error> semaErrors)
+        public Block(BlockSyntax syntax, Queue<Error> errors)
         {
-            //!TODO: Semantic checking and build the tree.
             throw new NotImplementedException();
         }
     }

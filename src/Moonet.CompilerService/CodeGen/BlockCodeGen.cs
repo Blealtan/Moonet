@@ -5,9 +5,9 @@ using System.Reflection.Emit;
 
 namespace Moonet.CompilerService.CodeGen
 {
-    public static class TreeCodeGen
+    public static class BlockCodeGen
     {
-        public static MethodInfo CodeGen(this SemanticTree tree, ModuleBuilder moduleBuilder, Builder builder)
+        public static MethodInfo CodeGen(this Block s, ModuleBuilder moduleBuilder)
         {
             throw new NotImplementedException();
         }

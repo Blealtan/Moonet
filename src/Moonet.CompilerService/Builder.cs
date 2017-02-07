@@ -1,12 +1,13 @@
 ﻿using Moonet.CompilerService.CodeGen;
 using Moonet.CompilerService.Semantic;
+using Moonet.CompilerService.Syntax;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
 namespace Moonet.CompilerService
 {
-    public class Builder
+    public class Environment
     {
         private ICodeProvider _codeProvider;
 
@@ -14,20 +15,26 @@ namespace Moonet.CompilerService
 
         private string _prefix;
 
-        private Dictionary<string, (AssemblyBuilder, MethodInfo)> _builtReference = new Dictionary<string, MethodInfo>();
+        private Dictionary<string, SyntaxTree> _parsed = new Dictionary<string, SyntaxTree>();
 
-        public Builder(ICodeProvider codeProvider, INameProvider nameProvider, string prefix = "Moonet.Execute.")
+        private Dictionary<string, ModuleBuilder> _used = new Dictionary<string, ModuleBuilder>();
+
+        private Dictionary<string, MethodInfo> _built = new Dictionary<string, MethodInfo>();
+
+        private Dictionary<string, TypeInfo> _classes = new Dictionary<string, TypeInfo>();
+
+        public Environment(ICodeProvider codeProvider, INameProvider nameProvider, string prefix = "Moonet.Execute.")
         {
             _codeProvider = codeProvider;
             _nameProvider = nameProvider;
             _prefix = prefix;
         }
 
-        public bool TryBuild(string referenceName, out AssemblyBuilder assembly, out MethodInfo rootMethod, out Queue<Error> errors)
+        public bool TryParse(string referenceName, out SyntaxTree syntax, out Queue<Error> errors)
         {
-            if (_builtReference.ContainsKey(referenceName))
+            if (_parsed.ContainsKey(referenceName))
             {
-                (assembly, rootMethod) = _builtReference[referenceName];
+                syntax = _parsed[referenceName];
                 errors = null;
                 return true;
             }
@@ -39,31 +46,85 @@ namespace Moonet.CompilerService
 
             if (parser.ErrorQueue.Count != 0)
             {
-                assembly = null;
-                rootMethod = null;
+                syntax = null;
                 errors = parser.ErrorQueue;
                 return false;
             }
 
-            var semaErrors = new Queue<Error>();
-            var sema = new SemanticTree(syntaxTree, semaErrors);
+            syntax = syntaxTree;
+            errors = null;
 
-            if (semaErrors.Count != 0)
+            _parsed[referenceName] = syntax;
+            return true;
+        }
+
+        public bool TryUse(string referenceName, out ModuleBuilder module, out Queue<Error> errors)
+        {
+            if (_used.ContainsKey(referenceName))
             {
-                assembly = null;
-                rootMethod = null;
-                errors = semaErrors;
+                module = _used[referenceName];
+                errors = null;
+                return true;
+            }
+
+            if (!TryParse(referenceName, out SyntaxTree syntax, out errors))
+            {
+                module = null;
                 return false;
             }
 
-            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(_prefix + referenceName), AssemblyBuilderAccess.Run);
-            var moduleBuilder = assemblyBuilder.DefineDynamicModule(_prefix + referenceName + ".dll");
-
-
-            _builtReference[referenceName] 
-                = (assembly, rootMethod) 
-                = (assemblyBuilder, sema.CodeGen(moduleBuilder, this));
+            errors = new Queue<Error>();
+            var classes = new List<Class>();
+            foreach (var c in syntax.Classes)
+            {
+                var semaClass = new Class(c, errors);
+                if (errors.Count == 0) classes.Add(semaClass);
+                else
+                {
+                    module = null;
+                    return false;
+                }
+            }
             errors = null;
+
+            var assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(_prefix + referenceName), AssemblyBuilderAccess.Run);
+            module = assembly.DefineDynamicModule(_prefix + referenceName + ".dll");
+            foreach (var c in classes)
+                c.CodeGen(module);
+
+            _used[referenceName] = module;
+            return true;
+        }
+
+        public bool TryBuild(string referenceName, out MethodInfo rootMethod, out Queue<Error> errors)
+        {
+            if (_built.ContainsKey(referenceName))
+            {
+                rootMethod = _built[referenceName];
+                errors = null;
+                return true;
+            }
+
+            if (!TryUse(referenceName, out ModuleBuilder module, out errors))
+            {
+                module = null;
+                rootMethod = null;
+                return false;
+            }
+
+            errors = new Queue<Error>();
+            var root = new Block(_parsed[referenceName].Body, errors);
+            if (errors.Count != 0)
+            {
+                module = null;
+                rootMethod = null;
+                return false;
+            }
+            errors = null;
+
+            rootMethod = root.CodeGen(module);
+
+            _built[referenceName] = rootMethod;
             return true;
         }
     }

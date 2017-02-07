@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Moonet.CompilerService.Semantic
+﻿namespace Moonet.CompilerService.Semantic
 {
-    class Statement
+    public class Statement : SemanticNode
     {
     }
 }

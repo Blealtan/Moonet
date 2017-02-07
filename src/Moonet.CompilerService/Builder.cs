@@ -14,7 +14,7 @@ namespace Moonet.CompilerService
 
         private string _prefix;
 
-        private Dictionary<string, MethodInfo> _builtReference = new Dictionary<string, MethodInfo>();
+        private Dictionary<string, (AssemblyBuilder, MethodInfo)> _builtReference = new Dictionary<string, MethodInfo>();
 
         public Builder(ICodeProvider codeProvider, INameProvider nameProvider, string prefix = "Moonet.Execute.")
         {
@@ -27,8 +27,7 @@ namespace Moonet.CompilerService
         {
             if (_builtReference.ContainsKey(referenceName))
             {
-                assembly = null;
-                rootMethod = _builtReference[referenceName];
+                (assembly, rootMethod) = _builtReference[referenceName];
                 errors = null;
                 return true;
             }
@@ -59,9 +58,11 @@ namespace Moonet.CompilerService
 
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(_prefix + referenceName), AssemblyBuilderAccess.Run);
             var moduleBuilder = assemblyBuilder.DefineDynamicModule(_prefix + referenceName + ".dll");
-            
-            assembly = assemblyBuilder;
-            rootMethod = sema.CodeGen(moduleBuilder, this);
+
+
+            _builtReference[referenceName] 
+                = (assembly, rootMethod) 
+                = (assemblyBuilder, sema.CodeGen(moduleBuilder, this));
             errors = null;
             return true;
         }

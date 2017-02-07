@@ -158,4 +158,19 @@
             Arguments = arguments;
         }
     }
+
+    public class NewExpression : ExpressionSyntax
+    {
+        public readonly string Type;
+
+        public readonly ExpressionSyntax[] Arguments;
+
+        public NewExpression(int line, int colomn,
+            string type,
+            ExpressionSyntax[] arguments) : base(line, colomn)
+        {
+            Type = type;
+            Arguments = arguments;
+        }
+    }
 }

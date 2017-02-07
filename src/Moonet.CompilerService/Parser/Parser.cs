@@ -1,6 +1,7 @@
 ﻿using Moonet.CompilerService.Syntax;
 using System.Collections.Generic;
 using System.IO;
+using System;
 
 namespace Moonet.CompilerService.Parser
 {
@@ -770,6 +771,8 @@ namespace Moonet.CompilerService.Parser
                     return ParseFunctionBody();
                 case TokenType.LeftBrace:
                     return ParseTableConstructorExpression();
+                case TokenType.New:
+                    return ParseNew();
                 case TokenType.Name:
                 case TokenType.LeftParen:
                     return ParsePrefixExpression();
@@ -777,6 +780,28 @@ namespace Moonet.CompilerService.Parser
                     AddError("Unexpected expression start.");
                     return null;
             }
+        }
+
+        private NewExpression ParseNew()
+        {
+            var initLine = _line;
+            var initColomn = _colomn;
+
+            Next(); // Eat 'new'
+
+            if (Type != TokenType.Name)
+            {
+                AddError("Type name expected after 'new'.");
+                return null;
+            }
+
+            var type = StringValue;
+            Next();
+
+            var args = ParseArguments();
+            if (args is null) AddError("Arguments expected after type name in new expression.");
+
+            return new NewExpression(initLine, initColomn, type, args);
         }
 
         private ExpressionSyntax ParsePrefixExpression()
@@ -816,24 +841,9 @@ namespace Moonet.CompilerService.Parser
                         Next();
                         continue;
                     case TokenType.LeftParen:
-                        var args = new List<ExpressionSyntax>();
-                        do
-                        {
-                            Next(); // Eat '(' or ','
-                            args.AddIfNonNull(ParseExpression());
-                        } while (Type == TokenType.Comma);
-                        if (Type != TokenType.RightParen) AddError("Parentheses not match.");
-                        current = new FunctionCallExpression(initLine, initColomn, current, args.ToArray());
-                        continue;
                     case TokenType.StringLiteral:
-                        current = new FunctionCallExpression(initLine, initColomn, current, new ExpressionSyntax[] {
-                            new LiteralExpressionSyntax<string>(_line, _colomn, LiteralType.String, StringValue)
-                        });
-                        continue;
                     case TokenType.LeftBrace:
-                        current = new FunctionCallExpression(initLine, initColomn, current, new ExpressionSyntax[] {
-                            ParseTableConstructorExpression()
-                        });
+                        current = new FunctionCallExpression(initLine, initColomn, current, ParseArguments());
                         continue;
                     case TokenType.Colon:
                         continue;
@@ -842,6 +852,32 @@ namespace Moonet.CompilerService.Parser
             }
 
             return current;
+        }
+
+        private ExpressionSyntax[] ParseArguments()
+        {
+            switch (Type)
+            {
+                case TokenType.LeftParen:
+                    var args = new List<ExpressionSyntax>();
+                    do
+                    {
+                        Next(); // Eat '(' or ','
+                        args.AddIfNonNull(ParseExpression());
+                    } while (Type == TokenType.Comma);
+                    if (Type != TokenType.RightParen) AddError("Parentheses not match.");
+                    return args.ToArray();
+                case TokenType.StringLiteral:
+                    var s = new ExpressionSyntax[] { new LiteralExpressionSyntax<string>(_line, _colomn, LiteralType.String, StringValue) };
+                    Next();
+                    return s;
+                case TokenType.LeftBrace:
+                    var t = new ExpressionSyntax[] { ParseTableConstructorExpression() };
+                    Next();
+                    return t;
+                default:
+                    return null;
+            }
         }
 
         private FunctionDefinitionExpression ParseFunctionBody()

@@ -76,19 +76,7 @@ namespace Moonet.CompilerService.Parser
                     case TokenType.StringLiteral:
                         var file = (_current as Token<string>).Value;
                         Next();
-                        string asVar = null;
-                        if (Type == TokenType.As)
-                        {
-                            Next();
-                            if (Type != TokenType.Name)
-                                AddError("Expected variable name after 'as' in using statement.");
-                            else
-                            {
-                                asVar = StringValue;
-                                Next();
-                            }
-                        }
-                        usings.Add(new UsingFileSyntax(line, colomn, file, asVar));
+                        usings.Add(new UsingFileSyntax(line, colomn, file));
                         break;
                     case TokenType.Namespace:
                         Next();

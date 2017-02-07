@@ -21,12 +21,9 @@
     {
         public readonly string UsingFileName;
 
-        public readonly string AsVar;
-
-        public UsingFileSyntax(int line, int colomn, string usingFileName, string asVar) : base(line, colomn)
+        public UsingFileSyntax(int line, int colomn, string usingFileName) : base(line, colomn)
         {
             UsingFileName = usingFileName;
-            AsVar = asVar;
         }
     }
 }

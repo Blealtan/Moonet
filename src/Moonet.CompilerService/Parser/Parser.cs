@@ -38,19 +38,16 @@ namespace Moonet.CompilerService.Parser
         #region Error Helper
         public Queue<Error> ErrorQueue { get; }
 
-        private readonly int _maxErrors;
-
         private void AddError(string message)
         {
             ErrorQueue.Enqueue(new Error(_line, _colomn, _lexer.CurrentLine, message));
         }
         #endregion
 
-        public Parser(TextReader src, int maxErrors)
+        public Parser(TextReader src)
         {
             ErrorQueue = new Queue<Error>();
             _lexer = new Lexer(src, ErrorQueue);
-            _maxErrors = maxErrors;
         }
 
         public SyntaxTree Parse()
@@ -71,7 +68,6 @@ namespace Moonet.CompilerService.Parser
             var usings = new List<UsingSyntax>();
             while (Type == TokenType.Using)
             {
-                if (ErrorQueue.Count >= _maxErrors) return null;
                 int line = _line, colomn = _colomn;
                 Next();
                 switch (Type)

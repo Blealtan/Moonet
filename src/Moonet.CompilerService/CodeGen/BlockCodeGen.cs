@@ -7,7 +7,7 @@ namespace Moonet.CompilerService.CodeGen
 {
     public static class BlockCodeGen
     {
-        public static MethodInfo CodeGen(this Block s, ModuleBuilder moduleBuilder)
+        public static void CodeGen(this Block s, MethodBuilder methodBuilder)
         {
             throw new NotImplementedException();
         }

@@ -23,6 +23,8 @@ namespace Moonet.CompilerService
 
         private Dictionary<string, TypeInfo> _classes = new Dictionary<string, TypeInfo>();
 
+        public Dictionary<string, TypeInfo> Classes => _classes;
+
         public Environment(ICodeProvider codeProvider, INameProvider nameProvider, string prefix = "Moonet.Execute.")
         {
             _codeProvider = codeProvider;
@@ -90,41 +92,59 @@ namespace Moonet.CompilerService
             var assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(_prefix + referenceName), AssemblyBuilderAccess.Run);
             module = assembly.DefineDynamicModule(_prefix + referenceName + ".dll");
             foreach (var c in classes)
-                c.CodeGen(module);
+            {
+                var tb = module.DefineType(_prefix + c.Name);
+                c.CodeGen(tb);
+                _classes[c.Name] = tb.CreateTypeInfo();
+            }
 
             _used[referenceName] = module;
             return true;
         }
 
-        public bool TryBuild(string referenceName, out MethodInfo rootMethod, out Queue<Error> errors)
+        public bool TryBuild(string referenceName, out MethodInfo root, out Queue<Error> errors)
         {
             if (_built.ContainsKey(referenceName))
             {
-                rootMethod = _built[referenceName];
+                root = _built[referenceName];
                 errors = null;
                 return true;
             }
 
+            if (!TryParse(referenceName, out SyntaxTree syntax, out errors))
+            {
+                root = null;
+                return false;
+            }
+
+            foreach (var u in syntax.Usings)
+                if (u is UsingFileSyntax uf)
+                    if (!TryUse(uf.UsingFileName, out ModuleBuilder ignored, out errors))
+                    {
+                        root = null;
+                        return false;
+                    }
+
             if (!TryUse(referenceName, out ModuleBuilder module, out errors))
             {
-                module = null;
-                rootMethod = null;
+                root = null;
                 return false;
             }
 
             errors = new Queue<Error>();
-            var root = new Block(_parsed[referenceName].Body, errors);
+            var body = new Block(_parsed[referenceName].Body, errors);
             if (errors.Count != 0)
             {
-                module = null;
-                rootMethod = null;
+                root = null;
                 return false;
             }
             errors = null;
 
-            rootMethod = root.CodeGen(module);
+            var tb = module.DefineType(_prefix + referenceName + "Root<>");
+            var mb = tb.DefineMethod("Main", MethodAttributes.Public | MethodAttributes.Static);
+            body.CodeGen(mb);
 
-            _built[referenceName] = rootMethod;
+            _built[referenceName] = root = tb.CreateTypeInfo().GetDeclaredMethod("Main");
             return true;
         }
     }
